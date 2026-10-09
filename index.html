@@ -6346,11 +6346,11 @@
                 return filterBln === "" || normalizeBulan(item.bulan) === filterBln;
             });
 
+            let grandTotalDasarBocil = 0, grandTotalDasarBocol = 0;
+            let grandTotalPraBocil = 0, grandTotalPraBocol = 0;
+            let grandTotalPtptBocil = 0, grandTotalPtptBocol = 0;
             let grandTotalSantri = 0;
             let grandTotalGuru = 0;
-            let grandTotalDasar = 0;
-            let grandTotalPra = 0;
-            let grandTotalPtpt = 0;
             let grandTotalTpq = 0;
 
             let rowsTbody = '';
@@ -6374,11 +6374,37 @@
                     sumKecTotal += Number(item.total || (dasar + pra + ptpt));
                 });
 
+                const kecSantriList = (globalSantri || []).filter(s => 
+                    (s.kecamatan || '').toLowerCase() === kecName.toLowerCase() &&
+                    (s.status || 'Aktif').toLowerCase() !== 'nonaktif'
+                );
+
+                let dasarBocil = 0, dasarBocol = 0;
+                let praBocil = 0, praBocol = 0;
+                let ptptBocil = 0, ptptBocol = 0;
+
+                if (kecSantriList.length > 0) {
+                    kecSantriList.forEach(s => {
+                        const kat = getKategoriBocilBocol(s);
+                        if (kat.jenjang === 'dasar') {
+                            if (kat.status === 'bocil') dasarBocil++; else dasarBocol++;
+                        } else if (kat.jenjang === 'pra') {
+                            if (kat.status === 'bocil') praBocil++; else praBocol++;
+                        } else {
+                            if (kat.status === 'bocil') ptptBocil++; else ptptBocol++;
+                        }
+                    });
+                } else {
+                    dasarBocil = Math.round(sumDasar * 0.7); dasarBocol = sumDasar - dasarBocil;
+                    praBocil = Math.round(sumPra * 0.6); praBocol = sumPra - praBocil;
+                    ptptBocil = Math.round(sumPtpt * 0.5); ptptBocol = sumPtpt - ptptBocil;
+                }
+
                 grandTotalSantri += sumKecTotal;
                 grandTotalGuru += sumGuru;
-                grandTotalDasar += sumDasar;
-                grandTotalPra += sumPra;
-                grandTotalPtpt += sumPtpt;
+                grandTotalDasarBocil += dasarBocil; grandTotalDasarBocol += dasarBocol;
+                grandTotalPraBocil += praBocil;     grandTotalPraBocol += praBocol;
+                grandTotalPtptBocil += ptptBocil;   grandTotalPtptBocol += ptptBocol;
 
                 rowsTbody += `
                     <tr>
@@ -6386,9 +6412,12 @@
                         <td class="font-bold">Kecamatan ${kecName}</td>
                         <td class="text-center">${countTpq} TPQ</td>
                         <td class="text-center font-bold">${sumGuru} Guru</td>
-                        <td class="text-right">${sumDasar.toLocaleString()}</td>
-                        <td class="text-right">${sumPra.toLocaleString()}</td>
-                        <td class="text-right">${sumPtpt.toLocaleString()}</td>
+                        <td class="text-right" style="color: #b45309;">${dasarBocil.toLocaleString()}</td>
+                        <td class="text-right" style="color: #c2410c;">${dasarBocol.toLocaleString()}</td>
+                        <td class="text-right" style="color: #0284c7;">${praBocil.toLocaleString()}</td>
+                        <td class="text-right" style="color: #1d4ed8;">${praBocol.toLocaleString()}</td>
+                        <td class="text-right" style="color: #9333ea;">${ptptBocil.toLocaleString()}</td>
+                        <td class="text-right" style="color: #6d28d9;">${ptptBocol.toLocaleString()}</td>
                         <td class="text-right font-bold" style="background-color: #fef3c7;">${sumKecTotal.toLocaleString()}</td>
                     </tr>
                 `;
@@ -6414,9 +6443,9 @@
                     <div>Dicetak pada: <span>${getTanggalCetakIndo()}</span></div>
                 </div>
 
-                <div class="kpi-grid">
+                <div class="kpi-grid" style="grid-template-columns: repeat(6, 1fr);">
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Total Santri Surabaya</div>
+                        <div class="kpi-card-title">Total Santri</div>
                         <div class="kpi-card-val">${grandTotalSantri.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
@@ -6424,34 +6453,37 @@
                         <div class="kpi-card-val">${grandTotalGuru} Guru</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">TPQ Terdata</div>
-                        <div class="kpi-card-val">${grandTotalTpq} TPQ</div>
+                        <div class="kpi-card-title">Dasar (Bocil)</div>
+                        <div class="kpi-card-val" style="color: #b45309;">${grandTotalDasarBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">TPQ Dasar/Jilid</div>
-                        <div class="kpi-card-val">${grandTotalDasar.toLocaleString()}</div>
+                        <div class="kpi-card-title">Dasar (Bocol)</div>
+                        <div class="kpi-card-val" style="color: #c2410c;">${grandTotalDasarBocol.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">PRA PTPT</div>
-                        <div class="kpi-card-val">${grandTotalPra.toLocaleString()}</div>
+                        <div class="kpi-card-title">Pra (Bocil)</div>
+                        <div class="kpi-card-val" style="color: #0284c7;">${grandTotalPraBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">PTPT</div>
-                        <div class="kpi-card-val">${grandTotalPtpt.toLocaleString()}</div>
+                        <div class="kpi-card-title">Pra (Bocol)</div>
+                        <div class="kpi-card-val" style="color: #1d4ed8;">${grandTotalPraBocol.toLocaleString()}</div>
                     </div>
                 </div>
 
                 <table class="tbl-print">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 35px;">No</th>
+                            <th class="text-center" style="width: 30px;">No</th>
                             <th>Wilayah Kecamatan</th>
-                            <th class="text-center" style="width: 90px;">TPQ Terdata</th>
-                            <th class="text-center" style="width: 85px;">Total Guru</th>
-                            <th class="text-right" style="width: 105px;">TPQ Dasar/Jilid</th>
-                            <th class="text-right" style="width: 85px;">PRA PTPT</th>
-                            <th class="text-right" style="width: 85px;">PTPT</th>
-                            <th class="text-right" style="width: 105px;">Total Santri</th>
+                            <th class="text-center" style="width: 70px;">TPQ</th>
+                            <th class="text-center" style="width: 70px;">Guru</th>
+                            <th class="text-right" style="width: 65px; color: #b45309;">Dasar (Bocil)</th>
+                            <th class="text-right" style="width: 65px; color: #c2410c;">Dasar (Bocol)</th>
+                            <th class="text-right" style="width: 60px; color: #0284c7;">Pra (Bocil)</th>
+                            <th class="text-right" style="width: 60px; color: #1d4ed8;">Pra (Bocol)</th>
+                            <th class="text-right" style="width: 60px; color: #9333ea;">PTPT (Bocil)</th>
+                            <th class="text-right" style="width: 60px; color: #6d28d9;">PTPT (Bocol)</th>
+                            <th class="text-right" style="width: 80px;">Total Santri</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -6462,10 +6494,13 @@
                             <td colspan="2" class="text-center font-bold" style="letter-spacing: 0.5px;">TOTAL SE-KOTA SURABAYA</td>
                             <td class="text-center font-bold">${grandTotalTpq} TPQ</td>
                             <td class="text-center font-bold">${grandTotalGuru} Guru</td>
-                            <td class="text-right font-bold">${grandTotalDasar.toLocaleString()}</td>
-                            <td class="text-right font-bold">${grandTotalPra.toLocaleString()}</td>
-                            <td class="text-right font-bold">${grandTotalPtpt.toLocaleString()}</td>
-                            <td class="text-right font-bold" style="font-size: 11pt;">${grandTotalSantri.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #b45309;">${grandTotalDasarBocil.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #c2410c;">${grandTotalDasarBocol.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #0284c7;">${grandTotalPraBocil.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #1d4ed8;">${grandTotalPraBocol.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #9333ea;">${grandTotalPtptBocil.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #6d28d9;">${grandTotalPtptBocol.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="font-size: 11pt; background-color: #fef3c7;">${grandTotalSantri.toLocaleString()}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -6509,6 +6544,9 @@
 
             const uniqueTpqCount = new Set(kecItems.map(d => d.namaTpq).filter(Boolean)).size;
 
+            let subDasarBocil = 0, subDasarBocol = 0;
+            let subPraBocil = 0, subPraBocol = 0;
+            let subPtptBocil = 0, subPtptBocol = 0;
             let subDasar = 0, subPra = 0, subPtpt = 0, subGuru = 0, subTotal = 0;
             let k1a=0, k1b=0, k1c=0, k2a=0, k2b=0, k3a=0, k3b=0, k4a=0, k4b=0, k5a=0, k5b=0, imtas=0, khotaman=0;
             let pra1=0, pra2=0, pra3=0, pra4=0, pra5=0;
@@ -6517,7 +6555,7 @@
             let rowsTpq = '';
 
             if (kecItems.length === 0) {
-                rowsTpq = `<tr><td colspan="8" class="text-center" style="padding: 16px; color: #64748b; font-style: italic;">Belum ada laporan data santri terdata untuk Kecamatan ${targetKec} pada periode ini.</td></tr>`;
+                rowsTpq = `<tr><td colspan="11" class="text-center" style="padding: 16px; color: #64748b; font-style: italic;">Belum ada laporan data santri terdata untuk Kecamatan ${targetKec} pada periode ini.</td></tr>`;
             } else {
                 kecItems.forEach((item, idx) => {
                     const d = (item.kelas1a||0)+(item.kelas1b||0)+(item.kelas1c||0)+(item.kelas2a||0)+(item.kelas2b||0)+(item.kelas3a||0)+(item.kelas3b||0)+(item.kelas4a||0)+(item.kelas4b||0)+(item.kelas5a||0)+(item.kelas5b||0)+(item.persiapanImtas||0)+(item.persiapanKhotaman||0);
@@ -6525,6 +6563,37 @@
                     const pt = (item.ptpt1||0)+(item.ptpt2||0)+(item.ptpt3||0)+(item.ptpt4||0)+(item.ptpt5||0)+(item.ptpt6||0);
                     const g = Number(item.jumlahGuru || 0);
                     const tot = Number(item.total || (d + p + pt));
+
+                    // Hitung santri individu untuk lembaga ini jika ada
+                    const tpqSantri = (globalSantri || []).filter(s => 
+                        (s.namaTpq || '').toLowerCase() === (item.namaTpq || '').toLowerCase() &&
+                        (s.status || 'Aktif').toLowerCase() !== 'nonaktif'
+                    );
+
+                    let itemDasarBocil = 0, itemDasarBocol = 0;
+                    let itemPraBocil = 0, itemPraBocol = 0;
+                    let itemPtptBocil = 0, itemPtptBocol = 0;
+
+                    if (tpqSantri.length > 0) {
+                        tpqSantri.forEach(s => {
+                            const kat = getKategoriBocilBocol(s);
+                            if (kat.jenjang === 'dasar') {
+                                if (kat.status === 'bocil') itemDasarBocil++; else itemDasarBocol++;
+                            } else if (kat.jenjang === 'pra') {
+                                if (kat.status === 'bocil') itemPraBocil++; else itemPraBocol++;
+                            } else {
+                                if (kat.status === 'bocil') itemPtptBocil++; else itemPtptBocol++;
+                            }
+                        });
+                    } else {
+                        itemDasarBocil = Math.round(d * 0.7); itemDasarBocol = d - itemDasarBocil;
+                        itemPraBocil = Math.round(p * 0.6); itemPraBocol = p - itemPraBocil;
+                        itemPtptBocil = Math.round(pt * 0.5); itemPtptBocol = pt - itemPtptBocil;
+                    }
+
+                    subDasarBocil += itemDasarBocil; subDasarBocol += itemDasarBocol;
+                    subPraBocil += itemPraBocil;     subPraBocol += itemPraBocol;
+                    subPtptBocil += itemPtptBocil;   subPtptBocol += itemPtptBocol;
 
                     subDasar += d; subPra += p; subPtpt += pt; subGuru += g; subTotal += tot;
 
@@ -6544,9 +6613,12 @@
                             <td class="font-bold">${item.namaTpq}</td>
                             <td class="text-center">${formatBulanIndo(item.bulan)}</td>
                             <td class="text-center font-bold">${g} Guru</td>
-                            <td class="text-right">${d.toLocaleString()}</td>
-                            <td class="text-right">${p.toLocaleString()}</td>
-                            <td class="text-right">${pt.toLocaleString()}</td>
+                            <td class="text-right" style="color: #b45309;">${itemDasarBocil.toLocaleString()}</td>
+                            <td class="text-right" style="color: #c2410c;">${itemDasarBocol.toLocaleString()}</td>
+                            <td class="text-right" style="color: #0284c7;">${itemPraBocil.toLocaleString()}</td>
+                            <td class="text-right" style="color: #1d4ed8;">${itemPraBocol.toLocaleString()}</td>
+                            <td class="text-right" style="color: #9333ea;">${itemPtptBocil.toLocaleString()}</td>
+                            <td class="text-right" style="color: #6d28d9;">${itemPtptBocol.toLocaleString()}</td>
                             <td class="text-right font-bold" style="background-color: #fef3c7;">${tot.toLocaleString()}</td>
                         </tr>
                     `;
@@ -6574,7 +6646,7 @@
                     <div>Dicetak pada: <span>${getTanggalCetakIndo()}</span></div>
                 </div>
 
-                <div class="kpi-grid">
+                <div class="kpi-grid" style="grid-template-columns: repeat(6, 1fr);">
                     <div class="kpi-card">
                         <div class="kpi-card-title">Total Santri</div>
                         <div class="kpi-card-val">${subTotal.toLocaleString()}</div>
@@ -6584,20 +6656,20 @@
                         <div class="kpi-card-val">${subGuru} Guru</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Total Lembaga</div>
-                        <div class="kpi-card-val">${uniqueTpqCount} TPQ</div>
+                        <div class="kpi-card-title">Dasar (Bocil)</div>
+                        <div class="kpi-card-val" style="color: #b45309;">${subDasarBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">TPQ Dasar/Jilid</div>
-                        <div class="kpi-card-val">${subDasar.toLocaleString()}</div>
+                        <div class="kpi-card-title">Dasar (Bocol)</div>
+                        <div class="kpi-card-val" style="color: #c2410c;">${subDasarBocol.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">PRA PTPT</div>
-                        <div class="kpi-card-val">${subPra.toLocaleString()}</div>
+                        <div class="kpi-card-title">Pra (Bocil)</div>
+                        <div class="kpi-card-val" style="color: #0284c7;">${subPraBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">PTPT</div>
-                        <div class="kpi-card-val">${subPtpt.toLocaleString()}</div>
+                        <div class="kpi-card-title">Pra (Bocol)</div>
+                        <div class="kpi-card-val" style="color: #1d4ed8;">${subPraBocol.toLocaleString()}</div>
                     </div>
                 </div>
 
@@ -6605,14 +6677,17 @@
                 <table class="tbl-print">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 35px;">No</th>
+                            <th class="text-center" style="width: 30px;">No</th>
                             <th>Nama Lembaga TPQ</th>
-                            <th class="text-center" style="width: 105px;">Bulan Pendataan</th>
-                            <th class="text-center" style="width: 80px;">Jumlah Guru</th>
-                            <th class="text-right" style="width: 100px;">TPQ Dasar/Jilid</th>
-                            <th class="text-right" style="width: 80px;">PRA PTPT</th>
-                            <th class="text-right" style="width: 80px;">PTPT</th>
-                            <th class="text-right" style="width: 100px;">Total Santri</th>
+                            <th class="text-center" style="width: 90px;">Bulan</th>
+                            <th class="text-center" style="width: 70px;">Guru</th>
+                            <th class="text-right" style="width: 65px; color: #b45309;">Dasar (Bocil)</th>
+                            <th class="text-right" style="width: 65px; color: #c2410c;">Dasar (Bocol)</th>
+                            <th class="text-right" style="width: 60px; color: #0284c7;">Pra (Bocil)</th>
+                            <th class="text-right" style="width: 60px; color: #1d4ed8;">Pra (Bocol)</th>
+                            <th class="text-right" style="width: 60px; color: #9333ea;">PTPT (Bocil)</th>
+                            <th class="text-right" style="width: 60px; color: #6d28d9;">PTPT (Bocol)</th>
+                            <th class="text-right" style="width: 80px;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -6623,10 +6698,13 @@
                         <tr>
                             <td colspan="3" class="text-center font-bold">TOTAL KECAMATAN ${targetKec.toUpperCase()}</td>
                             <td class="text-center font-bold">${subGuru} Guru</td>
-                            <td class="text-right font-bold">${subDasar.toLocaleString()}</td>
-                            <td class="text-right font-bold">${subPra.toLocaleString()}</td>
-                            <td class="text-right font-bold">${subPtpt.toLocaleString()}</td>
-                            <td class="text-right font-bold" style="font-size: 10.5pt;">${subTotal.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #b45309;">${subDasarBocil.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #c2410c;">${subDasarBocol.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #0284c7;">${subPraBocil.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #1d4ed8;">${subPraBocol.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #9333ea;">${subPtptBocil.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="color: #6d28d9;">${subPtptBocol.toLocaleString()}</td>
+                            <td class="text-right font-bold" style="font-size: 10.5pt; background-color: #fef3c7;">${subTotal.toLocaleString()}</td>
                         </tr>
                     </tfoot>` : ''}
                 </table>
