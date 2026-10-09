@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Lembaga - Qiraati Surabaya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+    
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="https://e-qiraati.com/img/qiraati_gold.png" alt="Logo Qiraati" class="h-10 drop-shadow-sm">
+                <h1 class="text-xl font-extrabold text-slate-800">Dashboard Lembaga</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="lembaga-name-display" class="hidden md:inline text-sm font-semibold text-slate-500"></span>
+                <button id="logoutBtn" class="text-red-500 hover:text-red-700 font-semibold text-sm bg-red-50 px-4 py-2 rounded-full transition">Keluar</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8 p-4 max-w-6xl">
+        
+        <!-- Menu Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer hover:border-amber-400 hover:shadow-md transition group" onclick="showTab('guru')">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-amber-100 p-3 rounded-lg text-amber-600 group-hover:scale-110 transition">👥</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Data Guru</h2>
+                        <p class="text-slate-500 text-sm">Input & Kelola Guru</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer hover:border-blue-400 hover:shadow-md transition group" onclick="showTab('santri')">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-100 p-3 rounded-lg text-blue-600 group-hover:scale-110 transition">🎓</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Data Santri</h2>
+                        <p class="text-slate-500 text-sm">Registrasi Santri Baru</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer hover:border-green-400 hover:shadow-md transition group" onclick="showTab('kenaikan')">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-100 p-3 rounded-lg text-green-600 group-hover:scale-110 transition">📈</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Update Kelas</h2>
+                        <p class="text-slate-500 text-sm">Input kenaikan kelas santri</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="content-area" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 min-h-[400px] flex items-center justify-center">
+            <div class="text-center">
+                <div class="text-6xl mb-4">👋</div>
+                <h2 class="text-2xl font-bold text-slate-700">Selamat Datang!</h2>
+                <p class="text-slate-500 mt-2">Silakan pilih salah satu menu di atas untuk mulai memasukkan data.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Set nama lembaga di pojok kanan atas jika ada
+        const lembagaName = localStorage.getItem('lembagaName');
+        if(lembagaName) {
+            document.getElementById('lembaga-name-display').innerText = lembagaName;
+        }
+
+        function showTab(tabName) {
+            const area = document.getElementById('content-area');
+            area.classList.remove('flex', 'items-center', 'justify-center');
+            
+            if(tabName === 'santri') {
+                area.innerHTML = `
+                    <div class="max-w-2xl mx-auto">
+                        <h2 class="text-2xl font-extrabold mb-6 text-slate-800 flex items-center"><span class="bg-blue-100 p-2 rounded-lg mr-3">🎓</span> Form Data Santri Baru</h2>
+                        <form id="formSantri" class="space-y-5">
+                            <div>
+                                <label class="block text-slate-700 text-sm font-bold mb-2">Nama Lengkap Santri</label>
+                                <input type="text" id="s_nama" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 text-sm font-bold mb-2">Tempat, Tanggal Lahir</label>
+                                <input type="text" id="s_ttl" placeholder="Contoh: Surabaya, 12 Agustus 2015" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" required>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-1/2">
+                                    <label class="block text-slate-700 text-sm font-bold mb-2">NIS (Lokal)</label>
+                                    <input type="text" id="s_nis" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" required>
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-slate-700 text-sm font-bold mb-2">NISQ (Pusat)</label>
+                                    <input type="text" id="s_nisq" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" required>
+                                </div>
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-lg shadow transition">Simpan Data Santri</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('formSantri').addEventListener('submit', handleSantriSubmit);
+            } else if(tabName === 'guru') {
+                area.innerHTML = `
+                    <div class="max-w-2xl mx-auto">
+                        <h2 class="text-2xl font-extrabold mb-6 text-slate-800 flex items-center"><span class="bg-amber-100 p-2 rounded-lg mr-3">👥</span> Form Data Guru</h2>
+                        <form id="formGuru" class="space-y-5">
+                            <div>
+                                <label class="block text-slate-700 text-sm font-bold mb-2">Nama Lengkap Guru</label>
+                                <input type="text" id="g_nama" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition" required>
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-3 rounded-lg shadow transition">Simpan Data Guru</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('formGuru').addEventListener('submit', handleGuruSubmit);
+            } else if(tabName === 'kenaikan') {
+                area.innerHTML = `
+                    <div class="max-w-2xl mx-auto">
+                        <h2 class="text-2xl font-extrabold mb-6 text-slate-800 flex items-center"><span class="bg-green-100 p-2 rounded-lg mr-3">📈</span> Update Kenaikan Kelas</h2>
+                        <form id="formKenaikan" class="space-y-5">
+                            <div>
+                                <label class="block text-slate-700 text-sm font-bold mb-2">NISQ Santri</label>
+                                <input type="text" id="k_nisq" placeholder="Masukkan NISQ Santri" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 text-sm font-bold mb-2">Kelas / Level Tujuan</label>
+                                <select id="k_kelas" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition" required>
+                                    <option value="">-- Pilih Kelas --</option>
+                                    
+                                    <optgroup label="TPQ Dasar">
+                                        <option value="Kls 1A">Kls 1A</option>
+                                        <option value="Kls 1B">Kls 1B</option>
+                                        <option value="Kls 1C">Kls 1C</option>
+                                        <option value="Kls 2A">Kls 2A</option>
+                                        <option value="Kls 2B">Kls 2B</option>
+                                        <option value="Kls 3A">Kls 3A</option>
+                                        <option value="Kls 3B">Kls 3B</option>
+                                        <option value="Kls 4A">Kls 4A</option>
+                                        <option value="Kls 4B">Kls 4B</option>
+                                        <option value="Kls 5A">Kls 5A</option>
+                                        <option value="Kls 5B">Kls 5B</option>
+                                        <option value="Kls Persiapan Imtas">Kls Persiapan Imtas</option>
+                                        <option value="Persiapan Khotaman">Persiapan Khotaman</option>
+                                    </optgroup>
+                                    
+                                    <optgroup label="Pra PTPT">
+                                        <option value="Level 1">Level 1</option>
+                                        <option value="Level 2">Level 2</option>
+                                        <option value="Level 3">Level 3</option>
+                                        <option value="Level 4">Level 4</option>
+                                        <option value="Level 5">Level 5</option>
+                                    </optgroup>
+                                    
+                                    <optgroup label="PTPT">
+                                        <option value="PTPT Kls 1">PTPT Kls 1</option>
+                                        <option value="PTPT Kls 2">PTPT Kls 2</option>
+                                        <option value="PTPT Kls 3">PTPT Kls 3</option>
+                                        <option value="PTPT Kls 4">PTPT Kls 4</option>
+                                        <option value="PTPT Kls 5">PTPT Kls 5</option>
+                                        <option value="PTPT Kls 6">PTPT Kls 6</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 text-sm font-bold mb-2">Tanggal Kenaikan</label>
+                                <input type="date" id="k_tanggal" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition" required>
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-3 rounded-lg shadow transition">Simpan Kenaikan Kelas</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('formKenaikan').addEventListener('submit', handleKenaikanSubmit);
+            }
+        }
+    </script>
+</body>
+</html>
