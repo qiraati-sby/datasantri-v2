@@ -1743,10 +1743,10 @@
                                 <th class="py-3 px-3">Kecamatan</th>
                                 <th class="py-3 px-2 text-center">TPQ</th>
                                 <th class="py-3 px-2 text-center text-indigo-700">Guru</th>
-                                <th class="py-3 px-2 text-center text-amber-700">Dasar (Bocil)</th>
-                                <th class="py-3 px-2 text-center text-orange-700">Dasar (Bocol)</th>
-                                <th class="py-3 px-2 text-center text-sky-700">Pra (Bocil)</th>
-                                <th class="py-3 px-2 text-center text-blue-700">Pra (Bocol)</th>
+                                <th class="py-3 px-2 text-center text-amber-700">TPQ Dasar (Bocil)</th>
+                                <th class="py-3 px-2 text-center text-orange-700">TPQ Dasar (Bocol)</th>
+                                <th class="py-3 px-2 text-center text-sky-700">PRA PTPT (Bocil)</th>
+                                <th class="py-3 px-2 text-center text-blue-700">PRA PTPT (Bocol)</th>
                                 <th class="py-3 px-2 text-center text-purple-700">PTPT (Bocil)</th>
                                 <th class="py-3 px-2 text-center text-violet-700">PTPT (Bocol)</th>
                                 <th class="py-3 px-3 text-right bg-amber-50/70 text-amber-900 font-extrabold">Total Santri</th>
@@ -6443,7 +6443,7 @@
                     <div>Dicetak pada: <span>${getTanggalCetakIndo()}</span></div>
                 </div>
 
-                <div class="kpi-grid" style="grid-template-columns: repeat(6, 1fr);">
+                <div class="kpi-grid" style="grid-template-columns: repeat(8, 1fr);">
                     <div class="kpi-card">
                         <div class="kpi-card-title">Total Santri</div>
                         <div class="kpi-card-val">${grandTotalSantri.toLocaleString()}</div>
@@ -6453,20 +6453,28 @@
                         <div class="kpi-card-val">${grandTotalGuru} Guru</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Dasar (Bocil)</div>
+                        <div class="kpi-card-title">TPQ Dasar (Bocil)</div>
                         <div class="kpi-card-val" style="color: #b45309;">${grandTotalDasarBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Dasar (Bocol)</div>
+                        <div class="kpi-card-title">TPQ Dasar (Bocol)</div>
                         <div class="kpi-card-val" style="color: #c2410c;">${grandTotalDasarBocol.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Pra (Bocil)</div>
+                        <div class="kpi-card-title">PRA PTPT (Bocil)</div>
                         <div class="kpi-card-val" style="color: #0284c7;">${grandTotalPraBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Pra (Bocol)</div>
+                        <div class="kpi-card-title">PRA PTPT (Bocol)</div>
                         <div class="kpi-card-val" style="color: #1d4ed8;">${grandTotalPraBocol.toLocaleString()}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-card-title">PTPT (Bocil)</div>
+                        <div class="kpi-card-val" style="color: #9333ea;">${grandTotalPtptBocil.toLocaleString()}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-card-title">PTPT (Bocol)</div>
+                        <div class="kpi-card-val" style="color: #6d28d9;">${grandTotalPtptBocol.toLocaleString()}</div>
                     </div>
                 </div>
 
@@ -6477,10 +6485,10 @@
                             <th>Wilayah Kecamatan</th>
                             <th class="text-center" style="width: 70px;">TPQ</th>
                             <th class="text-center" style="width: 70px;">Guru</th>
-                            <th class="text-right" style="width: 65px; color: #b45309;">Dasar (Bocil)</th>
-                            <th class="text-right" style="width: 65px; color: #c2410c;">Dasar (Bocol)</th>
-                            <th class="text-right" style="width: 60px; color: #0284c7;">Pra (Bocil)</th>
-                            <th class="text-right" style="width: 60px; color: #1d4ed8;">Pra (Bocol)</th>
+                            <th class="text-right" style="width: 65px; color: #b45309;">TPQ Dasar (Bocil)</th>
+                            <th class="text-right" style="width: 65px; color: #c2410c;">TPQ Dasar (Bocol)</th>
+                            <th class="text-right" style="width: 60px; color: #0284c7;">PRA PTPT (Bocil)</th>
+                            <th class="text-right" style="width: 60px; color: #1d4ed8;">PRA PTPT (Bocol)</th>
                             <th class="text-right" style="width: 60px; color: #9333ea;">PTPT (Bocil)</th>
                             <th class="text-right" style="width: 60px; color: #6d28d9;">PTPT (Bocol)</th>
                             <th class="text-right" style="width: 80px;">Total Santri</th>
@@ -6646,7 +6654,7 @@
                     <div>Dicetak pada: <span>${getTanggalCetakIndo()}</span></div>
                 </div>
 
-                <div class="kpi-grid" style="grid-template-columns: repeat(6, 1fr);">
+                <div class="kpi-grid" style="grid-template-columns: repeat(8, 1fr);">
                     <div class="kpi-card">
                         <div class="kpi-card-title">Total Santri</div>
                         <div class="kpi-card-val">${subTotal.toLocaleString()}</div>
@@ -6656,20 +6664,28 @@
                         <div class="kpi-card-val">${subGuru} Guru</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Dasar (Bocil)</div>
+                        <div class="kpi-card-title">TPQ Dasar (Bocil)</div>
                         <div class="kpi-card-val" style="color: #b45309;">${subDasarBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Dasar (Bocol)</div>
+                        <div class="kpi-card-title">TPQ Dasar (Bocol)</div>
                         <div class="kpi-card-val" style="color: #c2410c;">${subDasarBocol.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Pra (Bocil)</div>
+                        <div class="kpi-card-title">PRA PTPT (Bocil)</div>
                         <div class="kpi-card-val" style="color: #0284c7;">${subPraBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">Pra (Bocol)</div>
+                        <div class="kpi-card-title">PRA PTPT (Bocol)</div>
                         <div class="kpi-card-val" style="color: #1d4ed8;">${subPraBocol.toLocaleString()}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-card-title">PTPT (Bocil)</div>
+                        <div class="kpi-card-val" style="color: #9333ea;">${subPtptBocil.toLocaleString()}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-card-title">PTPT (Bocol)</div>
+                        <div class="kpi-card-val" style="color: #6d28d9;">${subPtptBocol.toLocaleString()}</div>
                     </div>
                 </div>
 
@@ -6679,15 +6695,15 @@
                         <tr>
                             <th class="text-center" style="width: 30px;">No</th>
                             <th>Nama Lembaga TPQ</th>
-                            <th class="text-center" style="width: 90px;">Bulan</th>
-                            <th class="text-center" style="width: 70px;">Guru</th>
-                            <th class="text-right" style="width: 65px; color: #b45309;">Dasar (Bocil)</th>
-                            <th class="text-right" style="width: 65px; color: #c2410c;">Dasar (Bocol)</th>
-                            <th class="text-right" style="width: 60px; color: #0284c7;">Pra (Bocil)</th>
-                            <th class="text-right" style="width: 60px; color: #1d4ed8;">Pra (Bocol)</th>
-                            <th class="text-right" style="width: 60px; color: #9333ea;">PTPT (Bocil)</th>
-                            <th class="text-right" style="width: 60px; color: #6d28d9;">PTPT (Bocol)</th>
-                            <th class="text-right" style="width: 80px;">Total</th>
+                            <th class="text-center" style="width: 85px;">Bulan</th>
+                            <th class="text-center" style="width: 65px;">Guru</th>
+                            <th class="text-right" style="width: 70px; color: #b45309;">TPQ Dasar (Bocil)</th>
+                            <th class="text-right" style="width: 70px; color: #c2410c;">TPQ Dasar (Bocol)</th>
+                            <th class="text-right" style="width: 65px; color: #0284c7;">PRA PTPT (Bocil)</th>
+                            <th class="text-right" style="width: 65px; color: #1d4ed8;">PRA PTPT (Bocol)</th>
+                            <th class="text-right" style="width: 65px; color: #9333ea;">PTPT (Bocil)</th>
+                            <th class="text-right" style="width: 65px; color: #6d28d9;">PTPT (Bocol)</th>
+                            <th class="text-right" style="width: 75px;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
