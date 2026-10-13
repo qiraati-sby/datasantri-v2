@@ -313,7 +313,7 @@
                         <i class="fa-solid fa-book-open"></i>
                     </div>
                     <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TPQ Dasar</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TPQ Pagi</p>
                         <h3 id="statTotalDasar" class="text-xl font-black text-slate-900 mt-0.5">0</h3>
                     </div>
                 </div>
@@ -353,7 +353,7 @@
                         <h3 class="text-base font-black text-slate-900 mb-1 flex items-center gap-2">
                             <i class="fa-solid fa-chart-pie text-amber-600"></i> Komposisi Jenjang Santri
                         </h3>
-                        <p class="text-xs text-slate-500 mb-4">Perbandingan proporsi santri: TPQ Dasar, PRA PTPT, dan PTPT.</p>
+                        <p class="text-xs text-slate-500 mb-4">Perbandingan proporsi santri: TPQ Pagi, PRA PTPT, dan PTPT.</p>
                     </div>
                     <div class="relative h-64 flex items-center justify-center">
                         <canvas id="chartJenjang"></canvas>
@@ -381,7 +381,7 @@
                             <i class="fa-solid fa-layer-group"></i> Semua (24 Kelas)
                         </button>
                         <button type="button" onclick="setChartKelasFilter('dasar')" id="btnChartDasar" class="px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 text-slate-500 hover:text-slate-900">
-                            <i class="fa-solid fa-book"></i> TPQ Dasar (13)
+                            <i class="fa-solid fa-book"></i> TPQ Pagi (13)
                         </button>
                         <button type="button" onclick="setChartKelasFilter('pra')" id="btnChartPra" class="px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 text-slate-500 hover:text-slate-900">
                             <i class="fa-solid fa-graduation-cap"></i> PRA PTPT (5)
@@ -400,7 +400,7 @@
                                 <i class="fa-solid fa-book"></i>
                             </div>
                             <div>
-                                <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">TPQ Dasar (13 Kelas)</p>
+                                <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">TPQ Pagi (13 Kelas)</p>
                                 <p class="text-xs text-slate-500">Kls 1A–5B, Imtas, Khotaman</p>
                             </div>
                         </div>
@@ -461,7 +461,7 @@
 
                 <!-- 6 Kartu Indikator Kategori Usia (Bocil vs Bocol per Jenjang) -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <!-- 1. Dasar Bocil -->
+                    <!-- 1. TPQ Pagi Bocil -->
                     <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3.5 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
@@ -470,13 +470,13 @@
                             <span id="pctUsiaDasarBocil" class="text-[10px] font-black text-amber-800 bg-white px-2 py-0.5 rounded-lg border border-amber-200">0%</span>
                         </div>
                         <div class="mt-2.5">
-                            <p class="text-[10px] font-black text-amber-900 uppercase tracking-wider">Dasar Bocil</p>
+                            <p class="text-[10px] font-black text-amber-900 uppercase tracking-wider">TPQ Pagi Bocil</p>
                             <p class="text-[10px] text-amber-700 font-semibold">Usia 3 – 5 Th</p>
                             <h4 id="statUsiaDasarBocil" class="text-xl font-black text-slate-900 mt-1">0</h4>
                         </div>
                     </div>
 
-                    <!-- 2. Dasar Bocol -->
+                    <!-- 2. TPQ Pagi Bocol -->
                     <div class="bg-orange-50/70 border border-orange-200 rounded-2xl p-3.5 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="w-7 h-7 rounded-xl bg-orange-600 text-white flex items-center justify-center text-xs font-bold">
@@ -485,13 +485,13 @@
                             <span id="pctUsiaDasarBocol" class="text-[10px] font-black text-orange-800 bg-white px-2 py-0.5 rounded-lg border border-orange-200">0%</span>
                         </div>
                         <div class="mt-2.5">
-                            <p class="text-[10px] font-black text-orange-900 uppercase tracking-wider">Dasar Bocol</p>
+                            <p class="text-[10px] font-black text-orange-900 uppercase tracking-wider">TPQ Pagi Bocol</p>
                             <p class="text-[10px] text-orange-700 font-semibold">Usia &gt; 5 Th</p>
                             <h4 id="statUsiaDasarBocol" class="text-xl font-black text-slate-900 mt-1">0</h4>
                         </div>
                     </div>
 
-                    <!-- 3. Pra PTPT Bocil -->
+                    <!-- 3. PRA PTPT Bocil -->
                     <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-3.5 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="w-7 h-7 rounded-xl bg-sky-500 text-white flex items-center justify-center text-xs font-bold">
@@ -500,13 +500,13 @@
                             <span id="pctUsiaPraBocil" class="text-[10px] font-black text-sky-800 bg-white px-2 py-0.5 rounded-lg border border-sky-200">0%</span>
                         </div>
                         <div class="mt-2.5">
-                            <p class="text-[10px] font-black text-sky-900 uppercase tracking-wider">Pra PTPT Bocil</p>
+                            <p class="text-[10px] font-black text-sky-900 uppercase tracking-wider">PRA PTPT Bocil</p>
                             <p class="text-[10px] text-sky-700 font-semibold">Usia 3 – 9 Th</p>
                             <h4 id="statUsiaPraBocil" class="text-xl font-black text-slate-900 mt-1">0</h4>
                         </div>
                     </div>
 
-                    <!-- 4. Pra PTPT Bocol -->
+                    <!-- 4. PRA PTPT Bocol -->
                     <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-3.5 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
@@ -515,7 +515,7 @@
                             <span id="pctUsiaPraBocol" class="text-[10px] font-black text-blue-800 bg-white px-2 py-0.5 rounded-lg border border-blue-200">0%</span>
                         </div>
                         <div class="mt-2.5">
-                            <p class="text-[10px] font-black text-blue-900 uppercase tracking-wider">Pra PTPT Bocol</p>
+                            <p class="text-[10px] font-black text-blue-900 uppercase tracking-wider">PRA PTPT Bocol</p>
                             <p class="text-[10px] text-blue-700 font-semibold">Usia &gt; 9 Th</p>
                             <h4 id="statUsiaPraBocol" class="text-xl font-black text-slate-900 mt-1">0</h4>
                         </div>
@@ -856,7 +856,7 @@
                                         Kenaikan ke Jilid Baru <span class="text-red-500">*</span>
                                     </label>
                                     <select id="kenaikanJilidBaru" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 font-bold text-sm bg-white">
-                                        <optgroup label="TPQ Dasar (13 Tingkat)">
+                                        <optgroup label="TPQ Pagi (13 Tingkat)">
                                             <option value="Kls 1A">Kls 1A</option>
                                             <option value="Kls 1B">Kls 1B</option>
                                             <option value="Kls 1C">Kls 1C</option>
@@ -1613,7 +1613,7 @@
                         </span>
                         <h2 class="text-xl sm:text-2xl font-black text-slate-900">Rekapitulasi Santri per Kecamatan</h2>
                     </div>
-                    <p class="text-sm font-medium text-slate-500 mt-1">Akumulasi seluruh santri di 8 wilayah kecamatan se-Kota Surabaya (TPQ Dasar, PRA PTPT, dan PTPT).</p>
+                    <p class="text-sm font-medium text-slate-500 mt-1">Akumulasi seluruh santri di 8 wilayah kecamatan se-Kota Surabaya (TPQ Pagi, PRA PTPT, dan PTPT).</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <!-- Dropdown Cetak Rekapitulasi Kecamatan -->
@@ -1697,7 +1697,7 @@
                         <i class="fa-solid fa-book-open"></i>
                     </div>
                     <div>
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TPQ Dasar/Jilid</p>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TPQ Pagi/Jilid</p>
                         <h4 id="kecStatTotalDasar" class="text-xl font-black text-slate-900">0</h4>
                     </div>
                 </div>
@@ -1728,7 +1728,7 @@
                         <h3 class="font-extrabold text-base flex items-center gap-2">
                             <i class="fa-solid fa-table text-amber-400"></i> Tabel Rekapitulasi Santri per Wilayah Kecamatan
                         </h3>
-                        <p class="text-xs text-slate-400">Rincian data perbandingan santri Dasar, PRA PTPT, dan PTPT di 8 kecamatan Kota Surabaya.</p>
+                        <p class="text-xs text-slate-400">Rincian data perbandingan santri TPQ Pagi, PRA PTPT, dan PTPT di 8 kecamatan Kota Surabaya.</p>
                     </div>
                     <span class="text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-xl self-start">
                         8 Kecamatan
@@ -1743,8 +1743,8 @@
                                 <th class="py-3 px-3">Kecamatan</th>
                                 <th class="py-3 px-2 text-center">TPQ</th>
                                 <th class="py-3 px-2 text-center text-indigo-700">Guru</th>
-                                <th class="py-3 px-2 text-center text-amber-700">TPQ Dasar (Bocil)</th>
-                                <th class="py-3 px-2 text-center text-orange-700">TPQ Dasar (Bocol)</th>
+                                <th class="py-3 px-2 text-center text-amber-700">TPQ Pagi (Bocil)</th>
+                                <th class="py-3 px-2 text-center text-orange-700">TPQ Pagi (Bocol)</th>
                                 <th class="py-3 px-2 text-center text-sky-700">PRA PTPT (Bocil)</th>
                                 <th class="py-3 px-2 text-center text-blue-700">PRA PTPT (Bocol)</th>
                                 <th class="py-3 px-2 text-center text-purple-700">PTPT (Bocil)</th>
@@ -1892,7 +1892,7 @@
                                     Jilid / Kelas Saat Ini <span class="text-red-500">*</span>
                                 </label>
                                 <select id="editSantriJilid" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-semibold text-xs bg-white focus:ring-2 focus:ring-amber-500">
-                                    <optgroup label="Tingkat Dasar (Jilid 1 - 6)">
+                                    <optgroup label="TPQ Pagi (Jilid 1 - 6)">
                                         <option value="Kls 1A">Jilid 1 (Kls 1A)</option>
                                         <option value="Kls 1B">Jilid 1 (Kls 1B)</option>
                                         <option value="Kls 1C">Jilid 1 (Kls 1C)</option>
@@ -1909,7 +1909,7 @@
                                         <option value="Persiapan Imtas">Persiapan Imtas</option>
                                         <option value="Persiapan Khotaman">Persiapan Khotaman</option>
                                     </optgroup>
-                                    <optgroup label="Pra PTPT (Pasca Tahfidz / Lanjutan)">
+                                    <optgroup label="PRA PTPT (Pasca Tahfidz / Lanjutan)">
                                         <option value="Pra PTPT 1">Pra PTPT 1</option>
                                         <option value="Pra PTPT 2">Pra PTPT 2</option>
                                         <option value="Pra PTPT 3">Pra PTPT 3</option>
@@ -2322,7 +2322,7 @@
         }
 
         // Klasifikasi Bocil vs Bocol:
-        // - TPQ Dasar: usia 3 - 5 tahun = Bocil. Usia 5 tahun + 1 hari ke atas = Bocol.
+        // - TPQ Pagi: usia 3 - 5 tahun = Bocil. Usia 5 tahun + 1 hari ke atas = Bocol.
         // - Pra PTPT / PTPT: usia 3 - 9 tahun = Bocil. Usia 9 tahun + 1 hari ke atas = Bocol.
         function getKategoriBocilBocol(s) {
             const jenjang = deteksiJenjangSantri(s);
@@ -2334,14 +2334,14 @@
                 return {
                     jenjang: 'dasar',
                     status: isBocol ? 'bocol' : 'bocil',
-                    label: isBocol ? 'Dasar Bocol (> 5 th)' : 'Dasar Bocil (3–5 th)'
+                    label: isBocol ? 'TPQ Pagi Bocol (> 5 th)' : 'TPQ Pagi Bocil (3–5 th)'
                 };
             } else if (jenjang === 'pra') {
                 const isBocol = umurObj.isLebihDariTepatTahun(9);
                 return {
                     jenjang: 'pra',
                     status: isBocol ? 'bocol' : 'bocil',
-                    label: isBocol ? 'Pra PTPT Bocol (> 9 th)' : 'Pra PTPT Bocil (3–9 th)'
+                    label: isBocol ? 'PRA PTPT Bocol (> 9 th)' : 'PRA PTPT Bocil (3–9 th)'
                 };
             } else { // ptpt
                 const isBocol = umurObj.isLebihDariTepatTahun(9);
@@ -2391,7 +2391,7 @@
             if (j.includes('imtas')) return 'persiapanImtas';
             if (j.includes('khotam')) return 'persiapanKhotaman';
 
-            // 4. TPQ Dasar (13 kelas: 1A-1C, 2A-2B, 3A-3B, 4A-4B, 5A-5B)
+            // 4. TPQ Pagi (13 kelas: 1A-1C, 2A-2B, 3A-3B, 4A-4B, 5A-5B)
             if (j.includes('1a') || (j.includes('1') && j.includes('a'))) return 'kelas1a';
             if (j.includes('1b') || (j.includes('1') && j.includes('b'))) return 'kelas1b';
             if (j.includes('1c') || (j.includes('1') && j.includes('c'))) return 'kelas1c';
@@ -5253,7 +5253,7 @@
             chartJenjangInstance = new Chart(ctxJenjang, {
                 type: 'doughnut',
                 data: {
-                    labels: ['TPQ Dasar', 'PRA PTPT', 'PTPT'],
+                    labels: ['TPQ Pagi', 'PRA PTPT', 'PTPT'],
                     datasets: [{
                         data: [totalDasar, totalPra, totalPtpt],
                         backgroundColor: ['#d97706', '#2563eb', '#7c3aed'],
@@ -5285,19 +5285,19 @@
             });
 
             const dataDefDasar = [
-                { label: 'Kls 1A', value: sumKelas1a, color: '#f59e0b', category: 'TPQ Dasar' },
-                { label: 'Kls 1B', value: sumKelas1b, color: '#f59e0b', category: 'TPQ Dasar' },
-                { label: 'Kls 1C', value: sumKelas1c, color: '#f59e0b', category: 'TPQ Dasar' },
-                { label: 'Kls 2A', value: sumKelas2a, color: '#f59e0b', category: 'TPQ Dasar' },
-                { label: 'Kls 2B', value: sumKelas2b, color: '#f59e0b', category: 'TPQ Dasar' },
-                { label: 'Kls 3A', value: sumKelas3a, color: '#f59e0b', category: 'TPQ Dasar' },
-                { label: 'Kls 3B', value: sumKelas3b, color: '#f59e0b', category: 'TPQ Dasar' },
-                { label: 'Kls 4A', value: sumKelas4a, color: '#d97706', category: 'TPQ Dasar' },
-                { label: 'Kls 4B', value: sumKelas4b, color: '#d97706', category: 'TPQ Dasar' },
-                { label: 'Kls 5A', value: sumKelas5a, color: '#d97706', category: 'TPQ Dasar' },
-                { label: 'Kls 5B', value: sumKelas5b, color: '#d97706', category: 'TPQ Dasar' },
-                { label: 'Persiapan Imtas', value: sumPersiapanImtas, color: '#b45309', category: 'TPQ Dasar' },
-                { label: 'Persiapan Khotaman', value: sumPersiapanKhotaman, color: '#b45309', category: 'TPQ Dasar' }
+                { label: 'Kls 1A', value: sumKelas1a, color: '#f59e0b', category: 'TPQ Pagi' },
+                { label: 'Kls 1B', value: sumKelas1b, color: '#f59e0b', category: 'TPQ Pagi' },
+                { label: 'Kls 1C', value: sumKelas1c, color: '#f59e0b', category: 'TPQ Pagi' },
+                { label: 'Kls 2A', value: sumKelas2a, color: '#f59e0b', category: 'TPQ Pagi' },
+                { label: 'Kls 2B', value: sumKelas2b, color: '#f59e0b', category: 'TPQ Pagi' },
+                { label: 'Kls 3A', value: sumKelas3a, color: '#f59e0b', category: 'TPQ Pagi' },
+                { label: 'Kls 3B', value: sumKelas3b, color: '#f59e0b', category: 'TPQ Pagi' },
+                { label: 'Kls 4A', value: sumKelas4a, color: '#d97706', category: 'TPQ Pagi' },
+                { label: 'Kls 4B', value: sumKelas4b, color: '#d97706', category: 'TPQ Pagi' },
+                { label: 'Kls 5A', value: sumKelas5a, color: '#d97706', category: 'TPQ Pagi' },
+                { label: 'Kls 5B', value: sumKelas5b, color: '#d97706', category: 'TPQ Pagi' },
+                { label: 'Persiapan Imtas', value: sumPersiapanImtas, color: '#b45309', category: 'TPQ Pagi' },
+                { label: 'Persiapan Khotaman', value: sumPersiapanKhotaman, color: '#b45309', category: 'TPQ Pagi' }
             ];
 
             const dataDefPra = [
@@ -5392,10 +5392,10 @@
 
             // ================= KALKULASI STATISTIK KATEGORI USIA SANTRI (BOCIL vs BOCOL) =================
             let countUsia = {
-                'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Dasar - Bocil', rentang: '3 – 5 Tahun', color: '#f59e0b' },
-                'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Dasar - Bocol', rentang: '> 5 Tahun', color: '#ea580c' },
-                'pra_bocil':   { l: 0, p: 0, total: 0, label: 'Pra PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
-                'pra_bocol':   { l: 0, p: 0, total: 0, label: 'Pra PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
+                'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
+                'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
+                'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
+                'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
                 'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
                 'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
             };
@@ -6107,10 +6107,10 @@
                 { 'Keterangan': 'Total Santri', 'Nilai': snap.totalSantri },
                 { 'Keterangan': 'Total Guru', 'Nilai': snap.totalGuru },
                 { 'Keterangan': 'Total Lembaga', 'Nilai': snap.totalLembaga },
-                { 'Keterangan': 'TPQ Dasar (Bocil: 3-5 th)', 'Nilai': snap.dasarBocil || 0 },
-                { 'Keterangan': 'TPQ Dasar (Bocol: > 5 th)', 'Nilai': snap.dasarBocol || 0 },
-                { 'Keterangan': 'Pra PTPT (Bocil: 3-9 th)',  'Nilai': snap.praBocil || 0 },
-                { 'Keterangan': 'Pra PTPT (Bocol: > 9 th)',  'Nilai': snap.praBocol || 0 },
+                { 'Keterangan': 'TPQ Pagi (Bocil: 3-5 th)', 'Nilai': snap.dasarBocil || 0 },
+                { 'Keterangan': 'TPQ Pagi (Bocol: > 5 th)', 'Nilai': snap.dasarBocol || 0 },
+                { 'Keterangan': 'PRA PTPT (Bocil: 3-9 th)',  'Nilai': snap.praBocil || 0 },
+                { 'Keterangan': 'PRA PTPT (Bocol: > 9 th)',  'Nilai': snap.praBocol || 0 },
                 { 'Keterangan': 'PTPT (Bocil: 3-9 th)',      'Nilai': snap.ptptBocil || 0 },
                 { 'Keterangan': 'PTPT (Bocol: > 9 th)',      'Nilai': snap.ptptBocol || 0 },
             ];
@@ -6122,12 +6122,12 @@
             if (snap.role !== 'lembaga' && snap.statsKec && snap.statsKec.length > 0) {
                 const kecData = (snap.statsKec||[]).map((k,i) => ({
                     'No': i+1, 'Kecamatan': k.kecamatan,
-                    'Dasar Bocil (3-5 th)': k.dasarBocil||0,
-                    'Dasar Bocol (> 5 th)': k.dasarBocol||0,
-                    'Pra Bocil (3-9 th)':   k.praBocil||0,
-                    'Pra Bocol (> 9 th)':   k.praBocol||0,
-                    'PTPT Bocil (3-9 th)':  k.ptptBocil||0,
-                    'PTPT Bocol (> 9 th)':  k.ptptBocol||0,
+                    'TPQ Pagi Bocil (3-5 th)': k.dasarBocil||0,
+                    'TPQ Pagi Bocol (> 5 th)': k.dasarBocol||0,
+                    'PRA PTPT Bocil (3-9 th)':  k.praBocil||0,
+                    'PRA PTPT Bocol (> 9 th)':  k.praBocol||0,
+                    'PTPT Bocil (3-9 th)':     k.ptptBocil||0,
+                    'PTPT Bocol (> 9 th)':     k.ptptBocol||0,
                     'Total Santri': k.totalSantri, 'Total Guru': k.totalGuru, 'Total Lembaga': k.totalLembaga
                 }));
                 const wsKec = XLSX.utils.json_to_sheet(kecData);
@@ -6138,12 +6138,12 @@
             // Sheet 3: Per Lembaga
             const lembagaData = (snap.statsLembaga||[]).map((l,i) => ({
                 'No': i+1, 'Nama Lembaga TPQ': l.namaTpq, 'Kecamatan': l.kecamatan,
-                'Dasar Bocil (3-5 th)': l.dasarBocil||0,
-                'Dasar Bocol (> 5 th)': l.dasarBocol||0,
-                'Pra Bocil (3-9 th)':   l.praBocil||0,
-                'Pra Bocol (> 9 th)':   l.praBocol||0,
-                'PTPT Bocil (3-9 th)':  l.ptptBocil||0,
-                'PTPT Bocol (> 9 th)':  l.ptptBocol||0,
+                'TPQ Pagi Bocil (3-5 th)': l.dasarBocil||0,
+                'TPQ Pagi Bocol (> 5 th)': l.dasarBocol||0,
+                'PRA PTPT Bocil (3-9 th)':  l.praBocil||0,
+                'PRA PTPT Bocol (> 9 th)':  l.praBocol||0,
+                'PTPT Bocil (3-9 th)':     l.ptptBocil||0,
+                'PTPT Bocol (> 9 th)':     l.ptptBocol||0,
                 'Total Santri': l.totalSantri, 'Total Guru': l.totalGuru
             }));
             const wsLembaga = XLSX.utils.json_to_sheet(lembagaData);
@@ -6316,19 +6316,19 @@
                             </div>
 
                             <div class="w-full bg-slate-100 rounded-full h-2 flex overflow-hidden mb-3">
-                                <div class="bg-amber-500 h-full" style="width: ${pctDasar}%" title="Dasar: ${pctDasar}%"></div>
+                                <div class="bg-amber-500 h-full" style="width: ${pctDasar}%" title="TPQ Pagi: ${pctDasar}%"></div>
                                 <div class="bg-blue-600 h-full" style="width: ${pctPra}%" title="PRA PTPT: ${pctPra}%"></div>
                                 <div class="bg-purple-600 h-full" style="width: ${pctPtpt}%" title="PTPT: ${pctPtpt}%"></div>
                             </div>
 
                             <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1 border-t border-slate-100">
                                 <div class="p-1.5 rounded-xl bg-amber-50/70 border border-amber-100">
-                                    <p class="text-[9px] text-amber-700 font-bold uppercase">Dasar</p>
+                                    <p class="text-[9px] text-amber-700 font-bold uppercase">TPQ Pagi</p>
                                     <p class="font-black text-amber-900 text-xs">${dasarBocil + dasarBocol}</p>
                                     <p class="text-[8px] text-slate-400">B:${dasarBocil} | O:${dasarBocol}</p>
                                 </div>
                                 <div class="p-1.5 rounded-xl bg-blue-50/70 border border-blue-100">
-                                    <p class="text-[9px] text-blue-700 font-bold uppercase">PRA</p>
+                                    <p class="text-[9px] text-blue-700 font-bold uppercase">PRA PTPT</p>
                                     <p class="font-black text-blue-900 text-xs">${praBocil + praBocol}</p>
                                     <p class="text-[8px] text-slate-400">B:${praBocil} | O:${praBocol}</p>
                                 </div>
@@ -6431,12 +6431,12 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-                        <!-- 1. TPQ Dasar -->
+                        <!-- 1. TPQ Pagi -->
                         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col">
                             <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-2.5">
                                 <div>
                                     <h4 class="font-extrabold text-amber-800 text-xs uppercase flex items-center gap-1.5">
-                                        <i class="fa-solid fa-book text-amber-600"></i> TPQ DASAR (13 Kelas)
+                                        <i class="fa-solid fa-book text-amber-600"></i> TPQ PAGI (13 Kelas)
                                     </h4>
                                     <div class="text-[10.5px] text-slate-500 font-bold mt-0.5">
                                         <span class="text-amber-700">${subDasar.bocil.toLocaleString()} Bocil</span> &bull; 
@@ -6757,11 +6757,11 @@
                         <div class="kpi-card-val">${grandTotalGuru} Guru</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">TPQ Dasar (Bocil)</div>
+                        <div class="kpi-card-title">TPQ Pagi (Bocil)</div>
                         <div class="kpi-card-val" style="color: #b45309;">${grandTotalDasarBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">TPQ Dasar (Bocol)</div>
+                        <div class="kpi-card-title">TPQ Pagi (Bocol)</div>
                         <div class="kpi-card-val" style="color: #c2410c;">${grandTotalDasarBocol.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
@@ -6789,8 +6789,8 @@
                             <th style="text-align: left;">Wilayah Kecamatan</th>
                             <th class="text-center" style="width: 60px;">TPQ</th>
                             <th class="text-center" style="width: 60px;">Guru</th>
-                            <th class="text-center" style="width: 65px; color: #b45309;">TPQ Dasar<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
-                            <th class="text-center" style="width: 65px; color: #c2410c;">TPQ Dasar<br><span style="font-size: 6pt; font-weight: normal;">(Bocol)</span></th>
+                            <th class="text-center" style="width: 65px; color: #b45309;">TPQ Pagi<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
+                            <th class="text-center" style="width: 65px; color: #c2410c;">TPQ Pagi<br><span style="font-size: 6pt; font-weight: normal;">(Bocol)</span></th>
                             <th class="text-center" style="width: 65px; color: #0284c7;">PRA PTPT<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
                             <th class="text-center" style="width: 65px; color: #1d4ed8;">PRA PTPT<br><span style="font-size: 6pt; font-weight: normal;">(Bocol)</span></th>
                             <th class="text-center" style="width: 60px; color: #9333ea;">PTPT<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
@@ -6978,11 +6978,11 @@
                         <div class="kpi-card-val">${subGuru} Guru</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">TPQ Dasar (Bocil)</div>
+                        <div class="kpi-card-title">TPQ Pagi (Bocil)</div>
                         <div class="kpi-card-val" style="color: #b45309;">${subDasarBocil.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-card-title">TPQ Dasar (Bocol)</div>
+                        <div class="kpi-card-title">TPQ Pagi (Bocol)</div>
                         <div class="kpi-card-val" style="color: #c2410c;">${subDasarBocol.toLocaleString()}</div>
                     </div>
                     <div class="kpi-card">
@@ -7011,8 +7011,8 @@
                             <th style="text-align: left;">Nama Lembaga TPQ</th>
                             <th class="text-center" style="width: 75px;">Bulan</th>
                             <th class="text-center" style="width: 55px;">Guru</th>
-                            <th class="text-center" style="width: 65px; color: #b45309;">TPQ Dasar<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
-                            <th class="text-center" style="width: 65px; color: #c2410c;">TPQ Dasar<br><span style="font-size: 6pt; font-weight: normal;">(Bocol)</span></th>
+                            <th class="text-center" style="width: 65px; color: #b45309;">TPQ Pagi<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
+                            <th class="text-center" style="width: 65px; color: #c2410c;">TPQ Pagi<br><span style="font-size: 6pt; font-weight: normal;">(Bocol)</span></th>
                             <th class="text-center" style="width: 65px; color: #0284c7;">PRA PTPT<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
                             <th class="text-center" style="width: 65px; color: #1d4ed8;">PRA PTPT<br><span style="font-size: 6pt; font-weight: normal;">(Bocol)</span></th>
                             <th class="text-center" style="width: 60px; color: #9333ea;">PTPT<br><span style="font-size: 6pt; font-weight: normal;">(Bocil)</span></th>
@@ -7043,7 +7043,7 @@
                 <div class="grid-24">
                     <div class="col-jenjang">
                         <div class="col-jenjang-title">
-                            <span>TPQ DASAR (${subDasar.toLocaleString()})</span>
+                            <span>TPQ PAGI (${subDasar.toLocaleString()})</span>
                             <span class="sub-badge-bocil-bocol">
                                 <span style="color: #b45309; font-weight: 700;">${subDasarBocil.toLocaleString()} Bocil</span> | 
                                 <span style="color: #c2410c; font-weight: 700;">${subDasarBocol.toLocaleString()} Bocol</span>
