@@ -5185,7 +5185,9 @@
             }
 
             // Update 6 Kartu Metrik Kategori Usia
-            const totalAkumulasiUsia = Object.values(countUsia).reduce((acc, c) => acc + c.total, 0) || 1;
+            const rawTotalAkumulasiUsia = Object.values(countUsia).reduce((acc, c) => acc + c.total, 0);
+            const totalAkumulasiUsia = rawTotalAkumulasiUsia;
+            const divisorAkumulasiUsia = rawTotalAkumulasiUsia > 0 ? rawTotalAkumulasiUsia : 1;
 
             const mapKeys = [
                 { key: 'dasar_bocil', idNum: 'statUsiaDasarBocil', idPct: 'pctUsiaDasarBocil' },
@@ -5200,7 +5202,7 @@
                 const elNum = document.getElementById(m.idNum);
                 const elPct = document.getElementById(m.idPct);
                 const tot = countUsia[m.key].total;
-                const pct = Math.round((tot / totalAkumulasiUsia) * 100);
+                const pct = rawTotalAkumulasiUsia > 0 ? Math.round((tot / divisorAkumulasiUsia) * 100) : 0;
                 if (elNum) elNum.innerText = tot.toLocaleString();
                 if (elPct) elPct.innerText = `${pct}%`;
             });
@@ -5210,7 +5212,7 @@
             if (tbodyUsia) {
                 tbodyUsia.innerHTML = Object.keys(countUsia).map(k => {
                     const item = countUsia[k];
-                    const pct = Math.round((item.total / totalAkumulasiUsia) * 100);
+                    const pct = rawTotalAkumulasiUsia > 0 ? Math.round((item.total / divisorAkumulasiUsia) * 100) : 0;
                     return `
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
@@ -5267,7 +5269,7 @@
                                 callbacks: {
                                     label: function(ctx) {
                                         const val = ctx.parsed;
-                                        const pct = Math.round((val / totalAkumulasiUsia) * 100);
+                                        const pct = rawTotalAkumulasiUsia > 0 ? Math.round((val / divisorAkumulasiUsia) * 100) : 0;
                                         return ` ${ctx.label}: ${val.toLocaleString()} santri (${pct}%)`;
                                     }
                                 }
