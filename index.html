@@ -2360,6 +2360,240 @@
             return 'dasar_bocol';
         }
 
+        // Helper deteksi kategori 24 kelas untuk santri perorangan
+        function deteksiKategoriKelasSantri(s) {
+            if (!s) return null;
+            const j = String(s.jilidSekarang || s.kelasAwal || s.jilid || '').toLowerCase().trim();
+            if (!j) return null;
+
+            // 1. Pra PTPT (5 level)
+            if (j.includes('pra')) {
+                if (j.includes('1')) return 'praPtpt1';
+                if (j.includes('2')) return 'praPtpt2';
+                if (j.includes('3')) return 'praPtpt3';
+                if (j.includes('4')) return 'praPtpt4';
+                if (j.includes('5')) return 'praPtpt5';
+                return 'praPtpt1';
+            }
+
+            // 2. PTPT (6 kelas)
+            if (j.includes('ptpt')) {
+                if (j.includes('1')) return 'ptpt1';
+                if (j.includes('2')) return 'ptpt2';
+                if (j.includes('3')) return 'ptpt3';
+                if (j.includes('4')) return 'ptpt4';
+                if (j.includes('5')) return 'ptpt5';
+                if (j.includes('6')) return 'ptpt6';
+                return 'ptpt1';
+            }
+
+            // 3. Persiapan Imtas / Khotaman
+            if (j.includes('imtas')) return 'persiapanImtas';
+            if (j.includes('khotam')) return 'persiapanKhotaman';
+
+            // 4. TPQ Dasar (13 kelas: 1A-1C, 2A-2B, 3A-3B, 4A-4B, 5A-5B)
+            if (j.includes('1a') || (j.includes('1') && j.includes('a'))) return 'kelas1a';
+            if (j.includes('1b') || (j.includes('1') && j.includes('b'))) return 'kelas1b';
+            if (j.includes('1c') || (j.includes('1') && j.includes('c'))) return 'kelas1c';
+            if (j.includes('2a') || (j.includes('2') && j.includes('a'))) return 'kelas2a';
+            if (j.includes('2b') || (j.includes('2') && j.includes('b'))) return 'kelas2b';
+            if (j.includes('3a') || (j.includes('3') && j.includes('a'))) return 'kelas3a';
+            if (j.includes('3b') || (j.includes('3') && j.includes('b'))) return 'kelas3b';
+            if (j.includes('4a') || (j.includes('4') && j.includes('a'))) return 'kelas4a';
+            if (j.includes('4b') || (j.includes('4') && j.includes('b'))) return 'kelas4b';
+            if (j.includes('5a') || (j.includes('5') && j.includes('a'))) return 'kelas5a';
+            if (j.includes('5b') || (j.includes('5') && j.includes('b'))) return 'kelas5b';
+
+            if (j.includes('1')) return 'kelas1a';
+            if (j.includes('2')) return 'kelas2a';
+            if (j.includes('3')) return 'kelas3a';
+            if (j.includes('4')) return 'kelas4a';
+            if (j.includes('5') || j.includes('6')) return 'kelas5a';
+
+            return 'kelas1a';
+        }
+
+        // Kalkulasi Rincian 24 Kelas lengkap dengan Bocil dan Bocol
+        function hitungRincian24Kelas(kecName, kecItems, explicitJenjangTotals) {
+            const rawTotals = {
+                kelas1a: 0, kelas1b: 0, kelas1c: 0,
+                kelas2a: 0, kelas2b: 0,
+                kelas3a: 0, kelas3b: 0,
+                kelas4a: 0, kelas4b: 0,
+                kelas5a: 0, kelas5b: 0,
+                persiapanImtas: 0, persiapanKhotaman: 0,
+                praPtpt1: 0, praPtpt2: 0, praPtpt3: 0, praPtpt4: 0, praPtpt5: 0,
+                ptpt1: 0, ptpt2: 0, ptpt3: 0, ptpt4: 0, ptpt5: 0, ptpt6: 0
+            };
+
+            (kecItems || []).forEach(item => {
+                rawTotals.kelas1a += (item.kelas1a || 0);
+                rawTotals.kelas1b += (item.kelas1b || 0);
+                rawTotals.kelas1c += (item.kelas1c || 0);
+                rawTotals.kelas2a += (item.kelas2a || 0);
+                rawTotals.kelas2b += (item.kelas2b || 0);
+                rawTotals.kelas3a += (item.kelas3a || 0);
+                rawTotals.kelas3b += (item.kelas3b || 0);
+                rawTotals.kelas4a += (item.kelas4a || 0);
+                rawTotals.kelas4b += (item.kelas4b || 0);
+                rawTotals.kelas5a += (item.kelas5a || 0);
+                rawTotals.kelas5b += (item.kelas5b || 0);
+                rawTotals.persiapanImtas += (item.persiapanImtas || 0);
+                rawTotals.persiapanKhotaman += (item.persiapanKhotaman || 0);
+
+                rawTotals.praPtpt1 += (item.praPtpt1 || 0);
+                rawTotals.praPtpt2 += (item.praPtpt2 || 0);
+                rawTotals.praPtpt3 += (item.praPtpt3 || 0);
+                rawTotals.praPtpt4 += (item.praPtpt4 || 0);
+                rawTotals.praPtpt5 += (item.praPtpt5 || 0);
+
+                rawTotals.ptpt1 += (item.ptpt1 || 0);
+                rawTotals.ptpt2 += (item.ptpt2 || 0);
+                rawTotals.ptpt3 += (item.ptpt3 || 0);
+                rawTotals.ptpt4 += (item.ptpt4 || 0);
+                rawTotals.ptpt5 += (item.ptpt5 || 0);
+                rawTotals.ptpt6 += (item.ptpt6 || 0);
+            });
+
+            // Ambil data santri perorangan di kecamatan ini
+            const santriList = (typeof globalSantri !== 'undefined' && Array.isArray(globalSantri)) ? globalSantri : [];
+            const kecSantri = santriList.filter(s => 
+                (s.kecamatan || '').toLowerCase() === (kecName || '').toLowerCase() &&
+                (s.status || 'Aktif').toLowerCase() !== 'nonaktif'
+            );
+
+            const indivStats = {};
+            Object.keys(rawTotals).forEach(k => { indivStats[k] = { bocil: 0, bocol: 0 }; });
+
+            kecSantri.forEach(s => {
+                const catKey = deteksiKategoriKelasSantri(s);
+                if (catKey && indivStats[catKey]) {
+                    const kat = getKategoriBocilBocol(s);
+                    if (kat.status === 'bocil') indivStats[catKey].bocil++;
+                    else indivStats[catKey].bocol++;
+                }
+            });
+
+            // Bobot demografi usia standar jika belum ada santri individual di kelas tsb
+            const defaultRatios = {
+                kelas1a: 0.85, kelas1b: 0.82, kelas1c: 0.80,
+                kelas2a: 0.75, kelas2b: 0.70,
+                kelas3a: 0.65, kelas3b: 0.60,
+                kelas4a: 0.45, kelas4b: 0.40,
+                kelas5a: 0.30, kelas5b: 0.25,
+                persiapanImtas: 0.20, persiapanKhotaman: 0.15,
+                praPtpt1: 0.75, praPtpt2: 0.70, praPtpt3: 0.65, praPtpt4: 0.50, praPtpt5: 0.40,
+                ptpt1: 0.65, ptpt2: 0.60, ptpt3: 0.55, ptpt4: 0.45, ptpt5: 0.40, ptpt6: 0.35
+            };
+
+            const listDasar = ['kelas1a','kelas1b','kelas1c','kelas2a','kelas2b','kelas3a','kelas3b','kelas4a','kelas4b','kelas5a','kelas5b','persiapanImtas','persiapanKhotaman'];
+            const listPra = ['praPtpt1','praPtpt2','praPtpt3','praPtpt4','praPtpt5'];
+            const listPtpt = ['ptpt1','ptpt2','ptpt3','ptpt4','ptpt5','ptpt6'];
+
+            function processJenjangGroup(keys, explicitBocil, explicitBocol) {
+                const groupItems = keys.map(k => {
+                    const tot = rawTotals[k];
+                    const ind = indivStats[k];
+                    const indTotal = ind.bocil + ind.bocol;
+                    const r = indTotal > 0 ? (ind.bocil / indTotal) : (defaultRatios[k] || 0.5);
+                    return { key: k, total: tot, ratio: r, bocil: 0, bocol: 0 };
+                });
+
+                const groupTotal = groupItems.reduce((acc, c) => acc + c.total, 0);
+
+                let targetBocil;
+                if (explicitBocil !== undefined && explicitBocol !== undefined) {
+                    targetBocil = explicitBocil;
+                } else {
+                    let groupIndivBocil = 0, groupIndivTotal = 0;
+                    keys.forEach(k => {
+                        groupIndivBocil += indivStats[k].bocil;
+                        groupIndivTotal += (indivStats[k].bocil + indivStats[k].bocol);
+                    });
+                    if (groupIndivTotal > 0) {
+                        targetBocil = Math.round(groupTotal * (groupIndivBocil / groupIndivTotal));
+                    } else {
+                        const avgRatio = groupItems.reduce((acc, c) => acc + c.ratio, 0) / (groupItems.length || 1);
+                        targetBocil = Math.round(groupTotal * avgRatio);
+                    }
+                }
+
+                if (targetBocil > groupTotal) targetBocil = groupTotal;
+                if (targetBocil < 0) targetBocil = 0;
+
+                let currSum = 0;
+                groupItems.forEach(c => {
+                    if (c.total <= 0) {
+                        c.bocil = 0;
+                    } else {
+                        c.bocil = Math.round(c.total * c.ratio);
+                        if (c.bocil > c.total) c.bocil = c.total;
+                        if (c.bocil < 0) c.bocil = 0;
+                    }
+                    currSum += c.bocil;
+                });
+
+                let diff = targetBocil - currSum;
+                if (diff > 0) {
+                    const canAdd = groupItems.filter(c => c.total > c.bocil).sort((a,b) => b.total - a.total);
+                    let i = 0;
+                    while (diff > 0 && canAdd.length > 0) {
+                        canAdd[i % canAdd.length].bocil++;
+                        diff--;
+                        i++;
+                    }
+                } else if (diff < 0) {
+                    const canSub = groupItems.filter(c => c.bocil > 0).sort((a,b) => a.total - b.total);
+                    let i = 0;
+                    while (diff < 0 && canSub.length > 0) {
+                        canSub[i % canSub.length].bocil--;
+                        diff++;
+                        i++;
+                    }
+                }
+
+                groupItems.forEach(c => {
+                    c.bocol = c.total - c.bocil;
+                });
+
+                return groupItems;
+            }
+
+            const exp = explicitJenjangTotals || {};
+            const itemsDasar = processJenjangGroup(listDasar, exp.dasarBocil, exp.dasarBocol);
+            const itemsPra = processJenjangGroup(listPra, exp.praBocil, exp.praBocol);
+            const itemsPtpt = processJenjangGroup(listPtpt, exp.ptptBocil, exp.ptptBocol);
+
+            const mapResult = {};
+            [...itemsDasar, ...itemsPra, ...itemsPtpt].forEach(item => {
+                mapResult[item.key] = {
+                    total: item.total,
+                    bocil: item.bocil,
+                    bocol: item.bocol
+                };
+            });
+
+            const sumGroup = (items) => ({
+                total: items.reduce((a, b) => a + b.total, 0),
+                bocil: items.reduce((a, b) => a + b.bocil, 0),
+                bocol: items.reduce((a, b) => a + b.bocol, 0),
+            });
+
+            const subDasar = sumGroup(itemsDasar);
+            const subPra = sumGroup(itemsPra);
+            const subPtpt = sumGroup(itemsPtpt);
+
+            return {
+                classes: mapResult,
+                subDasar,
+                subPra,
+                subPtpt,
+                grandTotal: subDasar.total + subPra.total + subPtpt.total,
+                grandBocil: subDasar.bocil + subPra.bocil + subPtpt.bocil,
+                grandBocol: subDasar.bocol + subPra.bocol + subPtpt.bocol
+            };
+        }
+
         // Master Data Lembaga TPQ Resmi per Kecamatan di Kota Surabaya (Dinamis dari Google Sheet tab Users)
         let tpqListByKecamatan = {
             "Pakal": [],
@@ -6174,97 +6408,165 @@
 
             title.innerText = `Rincian Santri Kelas - Kecamatan ${kecName} (${filterBln ? formatBulanIndo(filterBln) : 'Semua Periode'})`;
 
-            let k1a=0, k1b=0, k1c=0, k2a=0, k2b=0, k3a=0, k3b=0, k4a=0, k4b=0, k5a=0, k5b=0, imtas=0, khotaman=0;
-            let pra1=0, pra2=0, pra3=0, pra4=0, pra5=0;
-            let ptpt1=0, ptpt2=0, ptpt3=0, ptpt4=0, ptpt5=0, ptpt6=0;
-
-            kecItems.forEach(item => {
-                k1a += (item.kelas1a||0); k1b += (item.kelas1b||0); k1c += (item.kelas1c||0);
-                k2a += (item.kelas2a||0); k2b += (item.kelas2b||0);
-                k3a += (item.kelas3a||0); k3b += (item.kelas3b||0);
-                k4a += (item.kelas4a||0); k4b += (item.kelas4b||0);
-                k5a += (item.kelas5a||0); k5b += (item.kelas5b||0);
-                imtas += (item.persiapanImtas||0); khotaman += (item.persiapanKhotaman||0);
-
-                pra1 += (item.praPtpt1||0); pra2 += (item.praPtpt2||0); pra3 += (item.praPtpt3||0); pra4 += (item.praPtpt4||0); pra5 += (item.praPtpt5||0);
-                ptpt1 += (item.ptpt1||0); ptpt2 += (item.ptpt2||0); ptpt3 += (item.ptpt3||0); ptpt4 += (item.ptpt4||0); ptpt5 += (item.ptpt5||0); ptpt6 += (item.ptpt6||0);
-            });
-
-            const subDasar = k1a+k1b+k1c+k2a+k2b+k3a+k3b+k4a+k4b+k5a+k5b+imtas+khotaman;
-            const subPra = pra1+pra2+pra3+pra4+pra5;
-            const subPtpt = ptpt1+ptpt2+ptpt3+ptpt4+ptpt5+ptpt6;
-            const subTotal = subDasar + subPra + subPtpt;
+            const detail24 = hitungRincian24Kelas(kecName, kecItems);
+            const c = detail24.classes;
+            const subDasar = detail24.subDasar;
+            const subPra = detail24.subPra;
+            const subPtpt = detail24.subPtpt;
+            const subTotal = detail24.grandTotal;
 
             content.innerHTML = `
                 <div class="space-y-6">
-                    <div class="bg-amber-50/80 p-4 rounded-2xl border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="bg-amber-50/80 p-4 rounded-2xl border border-amber-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-amber-950">
+                            <span>Laporan Masuk: <span class="bg-white px-2 py-0.5 rounded-lg border border-amber-300 font-black">${kecItems.length} TPQ</span></span>
+                            <span class="text-slate-300">&bull;</span>
+                            <span>Bocil: <span class="bg-white px-2 py-0.5 rounded-lg border border-amber-300 font-black text-amber-700">${detail24.grandBocil.toLocaleString()} Santri</span></span>
+                            <span class="text-slate-300">&bull;</span>
+                            <span>Bocol: <span class="bg-white px-2 py-0.5 rounded-lg border border-amber-300 font-black text-orange-700">${detail24.grandBocol.toLocaleString()} Santri</span></span>
+                        </div>
                         <p class="text-xs font-bold text-amber-900">
-                            Total Data Masuk: <span class="bg-white px-2 py-0.5 rounded-lg border border-amber-300 font-black">${kecItems.length} Laporan TPQ</span>
-                        </p>
-                        <p class="text-xs font-bold text-amber-900">
-                            Total Seluruh Santri Kec. ${kecName}: <span class="text-base font-black text-amber-700 bg-white px-3 py-1 rounded-xl border border-amber-300 shadow-xs">${subTotal.toLocaleString()} Santri</span>
+                            Total Santri Kec. ${kecName}: <span class="text-base font-black text-amber-700 bg-white px-3 py-1 rounded-xl border border-amber-300 shadow-xs">${subTotal.toLocaleString()} Santri</span>
                         </p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                         <!-- 1. TPQ Dasar -->
-                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
-                                <h4 class="font-extrabold text-amber-700 text-xs uppercase flex items-center gap-1.5">
-                                    <i class="fa-solid fa-book"></i> TPQ Dasar (13 Kelas)
-                                </h4>
-                                <span class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-lg text-xs font-black">${subDasar.toLocaleString()}</span>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-2.5">
+                                <div>
+                                    <h4 class="font-extrabold text-amber-800 text-xs uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-book text-amber-600"></i> TPQ DASAR (13 Kelas)
+                                    </h4>
+                                    <div class="text-[10.5px] text-slate-500 font-bold mt-0.5">
+                                        <span class="text-amber-700">${subDasar.bocil.toLocaleString()} Bocil</span> &bull; 
+                                        <span class="text-orange-700">${subDasar.bocol.toLocaleString()} Bocol</span>
+                                    </div>
+                                </div>
+                                <span class="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-xl text-xs font-black border border-amber-200">${subDasar.total.toLocaleString()}</span>
                             </div>
-                            <ul class="space-y-1.5 text-xs text-slate-700 font-medium">
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 1 A:</span> <strong>${k1a}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 1 B:</span> <strong>${k1b}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 1 C:</span> <strong>${k1c}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 2 A:</span> <strong>${k2a}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 2 B:</span> <strong>${k2b}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 3 A:</span> <strong>${k3a}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 3 B:</span> <strong>${k3b}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 4 A:</span> <strong>${k4a}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 4 B:</span> <strong>${k4b}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 5 A:</span> <strong>${k5a}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Kelas 5 B:</span> <strong>${k5b}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>Persiapan Imtas:</span> <strong>${imtas}</strong></li>
-                                <li class="flex justify-between pt-0.5"><span>Persiapan Khotaman:</span> <strong>${khotaman}</strong></li>
-                            </ul>
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-xs">
+                                    <thead>
+                                        <tr class="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-200/80">
+                                            <th class="text-left pb-1.5 font-bold">Kelas</th>
+                                            <th class="text-right pb-1.5 font-bold text-amber-700 w-14">Bocil</th>
+                                            <th class="text-right pb-1.5 font-bold text-orange-700 w-14">Bocol</th>
+                                            <th class="text-right pb-1.5 font-black text-slate-800 w-12">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 1 A</td><td class="text-right font-semibold text-amber-700">${c.kelas1a.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas1a.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas1a.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 1 B</td><td class="text-right font-semibold text-amber-700">${c.kelas1b.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas1b.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas1b.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 1 C</td><td class="text-right font-semibold text-amber-700">${c.kelas1c.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas1c.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas1c.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 2 A</td><td class="text-right font-semibold text-amber-700">${c.kelas2a.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas2a.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas2a.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 2 B</td><td class="text-right font-semibold text-amber-700">${c.kelas2b.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas2b.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas2b.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 3 A</td><td class="text-right font-semibold text-amber-700">${c.kelas3a.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas3a.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas3a.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 3 B</td><td class="text-right font-semibold text-amber-700">${c.kelas3b.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas3b.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas3b.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 4 A</td><td class="text-right font-semibold text-amber-700">${c.kelas4a.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas4a.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas4a.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 4 B</td><td class="text-right font-semibold text-amber-700">${c.kelas4b.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas4b.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas4b.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 5 A</td><td class="text-right font-semibold text-amber-700">${c.kelas5a.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas5a.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas5a.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Kelas 5 B</td><td class="text-right font-semibold text-amber-700">${c.kelas5b.bocil}</td><td class="text-right font-semibold text-orange-700">${c.kelas5b.bocol}</td><td class="text-right font-black text-slate-900">${c.kelas5b.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Persiapan Imtas</td><td class="text-right font-semibold text-amber-700">${c.persiapanImtas.bocil}</td><td class="text-right font-semibold text-orange-700">${c.persiapanImtas.bocol}</td><td class="text-right font-black text-slate-900">${c.persiapanImtas.total}</td></tr>
+                                        <tr class="hover:bg-amber-50/40"><td class="py-1">Persiapan Khotaman</td><td class="text-right font-semibold text-amber-700">${c.persiapanKhotaman.bocil}</td><td class="text-right font-semibold text-orange-700">${c.persiapanKhotaman.bocol}</td><td class="text-right font-black text-slate-900">${c.persiapanKhotaman.total}</td></tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="border-t-2 border-slate-300 font-black text-xs bg-amber-100/60">
+                                            <td class="py-1.5 text-left font-black text-amber-950">SUBTOTAL</td>
+                                            <td class="py-1.5 text-right font-black text-amber-700">${subDasar.bocil.toLocaleString()}</td>
+                                            <td class="py-1.5 text-right font-black text-orange-700">${subDasar.bocol.toLocaleString()}</td>
+                                            <td class="py-1.5 text-right font-black text-slate-950">${subDasar.total.toLocaleString()}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 2. PRA PTPT -->
-                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
-                                <h4 class="font-extrabold text-blue-700 text-xs uppercase flex items-center gap-1.5">
-                                    <i class="fa-solid fa-graduation-cap"></i> PRA PTPT (5 Level)
-                                </h4>
-                                <span class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-lg text-xs font-black">${subPra.toLocaleString()}</span>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-2.5">
+                                <div>
+                                    <h4 class="font-extrabold text-blue-800 text-xs uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-graduation-cap text-blue-600"></i> PRA PTPT (5 Level)
+                                    </h4>
+                                    <div class="text-[10.5px] text-slate-500 font-bold mt-0.5">
+                                        <span class="text-sky-700">${subPra.bocil.toLocaleString()} Bocil</span> &bull; 
+                                        <span class="text-blue-700">${subPra.bocol.toLocaleString()} Bocol</span>
+                                    </div>
+                                </div>
+                                <span class="bg-blue-100 text-blue-900 px-2.5 py-1 rounded-xl text-xs font-black border border-blue-200">${subPra.total.toLocaleString()}</span>
                             </div>
-                            <ul class="space-y-1.5 text-xs text-slate-700 font-medium">
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PRA Lev 1:</span> <strong>${pra1}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PRA Lev 2:</span> <strong>${pra2}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PRA Lev 3:</span> <strong>${pra3}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PRA Lev 4:</span> <strong>${pra4}</strong></li>
-                                <li class="flex justify-between pt-0.5"><span>PRA Lev 5:</span> <strong>${pra5}</strong></li>
-                            </ul>
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-xs">
+                                    <thead>
+                                        <tr class="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-200/80">
+                                            <th class="text-left pb-1.5 font-bold">Level</th>
+                                            <th class="text-right pb-1.5 font-bold text-sky-700 w-14">Bocil</th>
+                                            <th class="text-right pb-1.5 font-bold text-blue-700 w-14">Bocol</th>
+                                            <th class="text-right pb-1.5 font-black text-slate-800 w-12">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                                        <tr class="hover:bg-blue-50/40"><td class="py-1">PRA Level 1</td><td class="text-right font-semibold text-sky-700">${c.praPtpt1.bocil}</td><td class="text-right font-semibold text-blue-700">${c.praPtpt1.bocol}</td><td class="text-right font-black text-slate-900">${c.praPtpt1.total}</td></tr>
+                                        <tr class="hover:bg-blue-50/40"><td class="py-1">PRA Level 2</td><td class="text-right font-semibold text-sky-700">${c.praPtpt2.bocil}</td><td class="text-right font-semibold text-blue-700">${c.praPtpt2.bocol}</td><td class="text-right font-black text-slate-900">${c.praPtpt2.total}</td></tr>
+                                        <tr class="hover:bg-blue-50/40"><td class="py-1">PRA Level 3</td><td class="text-right font-semibold text-sky-700">${c.praPtpt3.bocil}</td><td class="text-right font-semibold text-blue-700">${c.praPtpt3.bocol}</td><td class="text-right font-black text-slate-900">${c.praPtpt3.total}</td></tr>
+                                        <tr class="hover:bg-blue-50/40"><td class="py-1">PRA Level 4</td><td class="text-right font-semibold text-sky-700">${c.praPtpt4.bocil}</td><td class="text-right font-semibold text-blue-700">${c.praPtpt4.bocol}</td><td class="text-right font-black text-slate-900">${c.praPtpt4.total}</td></tr>
+                                        <tr class="hover:bg-blue-50/40"><td class="py-1">PRA Level 5</td><td class="text-right font-semibold text-sky-700">${c.praPtpt5.bocil}</td><td class="text-right font-semibold text-blue-700">${c.praPtpt5.bocol}</td><td class="text-right font-black text-slate-900">${c.praPtpt5.total}</td></tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="border-t-2 border-slate-300 font-black text-xs bg-blue-100/60">
+                                            <td class="py-1.5 text-left font-black text-blue-950">SUBTOTAL</td>
+                                            <td class="py-1.5 text-right font-black text-sky-700">${subPra.bocil.toLocaleString()}</td>
+                                            <td class="py-1.5 text-right font-black text-blue-700">${subPra.bocol.toLocaleString()}</td>
+                                            <td class="py-1.5 text-right font-black text-slate-950">${subPra.total.toLocaleString()}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 3. PTPT -->
-                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
-                                <h4 class="font-extrabold text-purple-700 text-xs uppercase flex items-center gap-1.5">
-                                    <i class="fa-solid fa-award"></i> PTPT (6 Kelas)
-                                </h4>
-                                <span class="bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-lg text-xs font-black">${subPtpt.toLocaleString()}</span>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-2.5">
+                                <div>
+                                    <h4 class="font-extrabold text-purple-800 text-xs uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-award text-purple-600"></i> PTPT (6 Kelas)
+                                    </h4>
+                                    <div class="text-[10.5px] text-slate-500 font-bold mt-0.5">
+                                        <span class="text-purple-700">${subPtpt.bocil.toLocaleString()} Bocil</span> &bull; 
+                                        <span class="text-violet-700">${subPtpt.bocol.toLocaleString()} Bocol</span>
+                                    </div>
+                                </div>
+                                <span class="bg-purple-100 text-purple-900 px-2.5 py-1 rounded-xl text-xs font-black border border-purple-200">${subPtpt.total.toLocaleString()}</span>
                             </div>
-                            <ul class="space-y-1.5 text-xs text-slate-700 font-medium">
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PTPT Kelas 1:</span> <strong>${ptpt1}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PTPT Kelas 2:</span> <strong>${ptpt2}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PTPT Kelas 3:</span> <strong>${ptpt3}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PTPT Kelas 4:</span> <strong>${ptpt4}</strong></li>
-                                <li class="flex justify-between border-b border-slate-200/60 pb-1"><span>PTPT Kelas 5:</span> <strong>${ptpt5}</strong></li>
-                                <li class="flex justify-between pt-0.5"><span>PTPT Kelas 6:</span> <strong>${ptpt6}</strong></li>
-                            </ul>
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-xs">
+                                    <thead>
+                                        <tr class="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-200/80">
+                                            <th class="text-left pb-1.5 font-bold">Kelas</th>
+                                            <th class="text-right pb-1.5 font-bold text-purple-700 w-14">Bocil</th>
+                                            <th class="text-right pb-1.5 font-bold text-violet-700 w-14">Bocol</th>
+                                            <th class="text-right pb-1.5 font-black text-slate-800 w-12">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                                        <tr class="hover:bg-purple-50/40"><td class="py-1">PTPT Kelas 1</td><td class="text-right font-semibold text-purple-700">${c.ptpt1.bocil}</td><td class="text-right font-semibold text-violet-700">${c.ptpt1.bocol}</td><td class="text-right font-black text-slate-900">${c.ptpt1.total}</td></tr>
+                                        <tr class="hover:bg-purple-50/40"><td class="py-1">PTPT Kelas 2</td><td class="text-right font-semibold text-purple-700">${c.ptpt2.bocil}</td><td class="text-right font-semibold text-violet-700">${c.ptpt2.bocol}</td><td class="text-right font-black text-slate-900">${c.ptpt2.total}</td></tr>
+                                        <tr class="hover:bg-purple-50/40"><td class="py-1">PTPT Kelas 3</td><td class="text-right font-semibold text-purple-700">${c.ptpt3.bocil}</td><td class="text-right font-semibold text-violet-700">${c.ptpt3.bocol}</td><td class="text-right font-black text-slate-900">${c.ptpt3.total}</td></tr>
+                                        <tr class="hover:bg-purple-50/40"><td class="py-1">PTPT Kelas 4</td><td class="text-right font-semibold text-purple-700">${c.ptpt4.bocil}</td><td class="text-right font-semibold text-violet-700">${c.ptpt4.bocol}</td><td class="text-right font-black text-slate-900">${c.ptpt4.total}</td></tr>
+                                        <tr class="hover:bg-purple-50/40"><td class="py-1">PTPT Kelas 5</td><td class="text-right font-semibold text-purple-700">${c.ptpt5.bocil}</td><td class="text-right font-semibold text-violet-700">${c.ptpt5.bocol}</td><td class="text-right font-black text-slate-900">${c.ptpt5.total}</td></tr>
+                                        <tr class="hover:bg-purple-50/40"><td class="py-1">PTPT Kelas 6</td><td class="text-right font-semibold text-purple-700">${c.ptpt6.bocil}</td><td class="text-right font-semibold text-violet-700">${c.ptpt6.bocol}</td><td class="text-right font-black text-slate-900">${c.ptpt6.total}</td></tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="border-t-2 border-slate-300 font-black text-xs bg-purple-100/60">
+                                            <td class="py-1.5 text-left font-black text-purple-950">SUBTOTAL</td>
+                                            <td class="py-1.5 text-right font-black text-purple-700">${subPtpt.bocil.toLocaleString()}</td>
+                                            <td class="py-1.5 text-right font-black text-violet-700">${subPtpt.bocol.toLocaleString()}</td>
+                                            <td class="py-1.5 text-right font-black text-slate-950">${subPtpt.total.toLocaleString()}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -6635,6 +6937,16 @@
                 });
             }
 
+            const detail24 = hitungRincian24Kelas(targetKec, kecItems, {
+                dasarBocil: subDasarBocil,
+                dasarBocol: subDasarBocol,
+                praBocil: subPraBocil,
+                praBocol: subPraBocol,
+                ptptBocil: subPtptBocil,
+                ptptBocol: subPtptBocol
+            });
+            const c = detail24.classes;
+
             const htmlContent = `
                 <div class="kop-wrapper">
                     <img src="https://e-qiraati.com/img/qiraati_gold.png" class="kop-logo" alt="Logo Qiraati">
@@ -6730,39 +7042,117 @@
                 <div class="section-title">2. Rincian Akumulasi 24 Kategori Kelas di Kecamatan ${targetKec}</div>
                 <div class="grid-24">
                     <div class="col-jenjang">
-                        <div class="col-jenjang-title">TPQ Dasar/Jilid (Total: ${subDasar.toLocaleString()})</div>
-                        <div class="row-kelas"><span>Kelas 1 A:</span> <strong>${k1a}</strong></div>
-                        <div class="row-kelas"><span>Kelas 1 B:</span> <strong>${k1b}</strong></div>
-                        <div class="row-kelas"><span>Kelas 1 C:</span> <strong>${k1c}</strong></div>
-                        <div class="row-kelas"><span>Kelas 2 A:</span> <strong>${k2a}</strong></div>
-                        <div class="row-kelas"><span>Kelas 2 B:</span> <strong>${k2b}</strong></div>
-                        <div class="row-kelas"><span>Kelas 3 A:</span> <strong>${k3a}</strong></div>
-                        <div class="row-kelas"><span>Kelas 3 B:</span> <strong>${k3b}</strong></div>
-                        <div class="row-kelas"><span>Kelas 4 A:</span> <strong>${k4a}</strong></div>
-                        <div class="row-kelas"><span>Kelas 4 B:</span> <strong>${k4b}</strong></div>
-                        <div class="row-kelas"><span>Kelas 5 A:</span> <strong>${k5a}</strong></div>
-                        <div class="row-kelas"><span>Kelas 5 B:</span> <strong>${k5b}</strong></div>
-                        <div class="row-kelas"><span>Persiapan Imtas:</span> <strong>${imtas}</strong></div>
-                        <div class="row-kelas" style="border-bottom: none;"><span>Persiapan Khotaman:</span> <strong>${khotaman}</strong></div>
+                        <div class="col-jenjang-title">
+                            <span>TPQ DASAR (${subDasar.toLocaleString()})</span>
+                            <span class="sub-badge-bocil-bocol">
+                                <span style="color: #b45309; font-weight: 700;">${subDasarBocil.toLocaleString()} Bocil</span> | 
+                                <span style="color: #c2410c; font-weight: 700;">${subDasarBocol.toLocaleString()} Bocol</span>
+                            </span>
+                        </div>
+                        <table class="tbl-kelas-mini">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Kelas</th>
+                                    <th style="text-align: right; width: 34px; color: #b45309;">Bocil</th>
+                                    <th style="text-align: right; width: 34px; color: #c2410c;">Bocol</th>
+                                    <th style="text-align: right; width: 32px; color: #0f172a;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Kelas 1 A</td><td class="text-right text-dasar-bocil">${c.kelas1a.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas1a.bocol}</td><td class="text-right font-bold">${c.kelas1a.total}</td></tr>
+                                <tr><td>Kelas 1 B</td><td class="text-right text-dasar-bocil">${c.kelas1b.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas1b.bocol}</td><td class="text-right font-bold">${c.kelas1b.total}</td></tr>
+                                <tr><td>Kelas 1 C</td><td class="text-right text-dasar-bocil">${c.kelas1c.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas1c.bocol}</td><td class="text-right font-bold">${c.kelas1c.total}</td></tr>
+                                <tr><td>Kelas 2 A</td><td class="text-right text-dasar-bocil">${c.kelas2a.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas2a.bocol}</td><td class="text-right font-bold">${c.kelas2a.total}</td></tr>
+                                <tr><td>Kelas 2 B</td><td class="text-right text-dasar-bocil">${c.kelas2b.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas2b.bocol}</td><td class="text-right font-bold">${c.kelas2b.total}</td></tr>
+                                <tr><td>Kelas 3 A</td><td class="text-right text-dasar-bocil">${c.kelas3a.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas3a.bocol}</td><td class="text-right font-bold">${c.kelas3a.total}</td></tr>
+                                <tr><td>Kelas 3 B</td><td class="text-right text-dasar-bocil">${c.kelas3b.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas3b.bocol}</td><td class="text-right font-bold">${c.kelas3b.total}</td></tr>
+                                <tr><td>Kelas 4 A</td><td class="text-right text-dasar-bocil">${c.kelas4a.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas4a.bocol}</td><td class="text-right font-bold">${c.kelas4a.total}</td></tr>
+                                <tr><td>Kelas 4 B</td><td class="text-right text-dasar-bocil">${c.kelas4b.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas4b.bocol}</td><td class="text-right font-bold">${c.kelas4b.total}</td></tr>
+                                <tr><td>Kelas 5 A</td><td class="text-right text-dasar-bocil">${c.kelas5a.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas5a.bocol}</td><td class="text-right font-bold">${c.kelas5a.total}</td></tr>
+                                <tr><td>Kelas 5 B</td><td class="text-right text-dasar-bocil">${c.kelas5b.bocil}</td><td class="text-right text-dasar-bocol">${c.kelas5b.bocol}</td><td class="text-right font-bold">${c.kelas5b.total}</td></tr>
+                                <tr><td>Persiapan Imtas</td><td class="text-right text-dasar-bocil">${c.persiapanImtas.bocil}</td><td class="text-right text-dasar-bocol">${c.persiapanImtas.bocol}</td><td class="text-right font-bold">${c.persiapanImtas.total}</td></tr>
+                                <tr><td>Persiapan Khotaman</td><td class="text-right text-dasar-bocil">${c.persiapanKhotaman.bocil}</td><td class="text-right text-dasar-bocol">${c.persiapanKhotaman.bocol}</td><td class="text-right font-bold">${c.persiapanKhotaman.total}</td></tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><b>TOTAL</b></td>
+                                    <td class="text-right text-dasar-bocil" style="font-weight: 800;">${subDasarBocil.toLocaleString()}</td>
+                                    <td class="text-right text-dasar-bocol" style="font-weight: 800;">${subDasarBocol.toLocaleString()}</td>
+                                    <td class="text-right" style="font-weight: 900;">${subDasar.toLocaleString()}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
 
                     <div class="col-jenjang">
-                        <div class="col-jenjang-title">PRA PTPT (Total: ${subPra.toLocaleString()})</div>
-                        <div class="row-kelas"><span>PRA Level 1:</span> <strong>${pra1}</strong></div>
-                        <div class="row-kelas"><span>PRA Level 2:</span> <strong>${pra2}</strong></div>
-                        <div class="row-kelas"><span>PRA Level 3:</span> <strong>${pra3}</strong></div>
-                        <div class="row-kelas"><span>PRA Level 4:</span> <strong>${pra4}</strong></div>
-                        <div class="row-kelas" style="border-bottom: none;"><span>PRA Level 5:</span> <strong>${pra5}</strong></div>
+                        <div class="col-jenjang-title">
+                            <span>PRA PTPT (${subPra.toLocaleString()})</span>
+                            <span class="sub-badge-bocil-bocol">
+                                <span style="color: #0284c7; font-weight: 700;">${subPraBocil.toLocaleString()} Bocil</span> | 
+                                <span style="color: #1d4ed8; font-weight: 700;">${subPraBocol.toLocaleString()} Bocol</span>
+                            </span>
+                        </div>
+                        <table class="tbl-kelas-mini">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Kelas</th>
+                                    <th style="text-align: right; width: 34px; color: #0284c7;">Bocil</th>
+                                    <th style="text-align: right; width: 34px; color: #1d4ed8;">Bocol</th>
+                                    <th style="text-align: right; width: 32px; color: #0f172a;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>PRA Level 1</td><td class="text-right text-pra-bocil">${c.praPtpt1.bocil}</td><td class="text-right text-pra-bocol">${c.praPtpt1.bocol}</td><td class="text-right font-bold">${c.praPtpt1.total}</td></tr>
+                                <tr><td>PRA Level 2</td><td class="text-right text-pra-bocil">${c.praPtpt2.bocil}</td><td class="text-right text-pra-bocol">${c.praPtpt2.bocol}</td><td class="text-right font-bold">${c.praPtpt2.total}</td></tr>
+                                <tr><td>PRA Level 3</td><td class="text-right text-pra-bocil">${c.praPtpt3.bocil}</td><td class="text-right text-pra-bocol">${c.praPtpt3.bocol}</td><td class="text-right font-bold">${c.praPtpt3.total}</td></tr>
+                                <tr><td>PRA Level 4</td><td class="text-right text-pra-bocil">${c.praPtpt4.bocil}</td><td class="text-right text-pra-bocol">${c.praPtpt4.bocol}</td><td class="text-right font-bold">${c.praPtpt4.total}</td></tr>
+                                <tr><td>PRA Level 5</td><td class="text-right text-pra-bocil">${c.praPtpt5.bocil}</td><td class="text-right text-pra-bocol">${c.praPtpt5.bocol}</td><td class="text-right font-bold">${c.praPtpt5.total}</td></tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><b>TOTAL</b></td>
+                                    <td class="text-right text-pra-bocil" style="font-weight: 800;">${subPraBocil.toLocaleString()}</td>
+                                    <td class="text-right text-pra-bocol" style="font-weight: 800;">${subPraBocol.toLocaleString()}</td>
+                                    <td class="text-right" style="font-weight: 900;">${subPra.toLocaleString()}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
 
                     <div class="col-jenjang">
-                        <div class="col-jenjang-title">PTPT (Total: ${subPtpt.toLocaleString()})</div>
-                        <div class="row-kelas"><span>PTPT Kelas 1:</span> <strong>${ptpt1}</strong></div>
-                        <div class="row-kelas"><span>PTPT Kelas 2:</span> <strong>${ptpt2}</strong></div>
-                        <div class="row-kelas"><span>PTPT Kelas 3:</span> <strong>${ptpt3}</strong></div>
-                        <div class="row-kelas"><span>PTPT Kelas 4:</span> <strong>${ptpt4}</strong></div>
-                        <div class="row-kelas"><span>PTPT Kelas 5:</span> <strong>${ptpt5}</strong></div>
-                        <div class="row-kelas" style="border-bottom: none;"><span>PTPT Kelas 6:</span> <strong>${ptpt6}</strong></div>
+                        <div class="col-jenjang-title">
+                            <span>PTPT (${subPtpt.toLocaleString()})</span>
+                            <span class="sub-badge-bocil-bocol">
+                                <span style="color: #9333ea; font-weight: 700;">${subPtptBocil.toLocaleString()} Bocil</span> | 
+                                <span style="color: #6d28d9; font-weight: 700;">${subPtptBocol.toLocaleString()} Bocol</span>
+                            </span>
+                        </div>
+                        <table class="tbl-kelas-mini">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Kelas</th>
+                                    <th style="text-align: right; width: 34px; color: #9333ea;">Bocil</th>
+                                    <th style="text-align: right; width: 34px; color: #6d28d9;">Bocol</th>
+                                    <th style="text-align: right; width: 32px; color: #0f172a;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>PTPT Kelas 1</td><td class="text-right text-ptpt-bocil">${c.ptpt1.bocil}</td><td class="text-right text-ptpt-bocol">${c.ptpt1.bocol}</td><td class="text-right font-bold">${c.ptpt1.total}</td></tr>
+                                <tr><td>PTPT Kelas 2</td><td class="text-right text-ptpt-bocil">${c.ptpt2.bocil}</td><td class="text-right text-ptpt-bocol">${c.ptpt2.bocol}</td><td class="text-right font-bold">${c.ptpt2.total}</td></tr>
+                                <tr><td>PTPT Kelas 3</td><td class="text-right text-ptpt-bocil">${c.ptpt3.bocil}</td><td class="text-right text-ptpt-bocol">${c.ptpt3.bocol}</td><td class="text-right font-bold">${c.ptpt3.total}</td></tr>
+                                <tr><td>PTPT Kelas 4</td><td class="text-right text-ptpt-bocil">${c.ptpt4.bocil}</td><td class="text-right text-ptpt-bocol">${c.ptpt4.bocol}</td><td class="text-right font-bold">${c.ptpt4.total}</td></tr>
+                                <tr><td>PTPT Kelas 5</td><td class="text-right text-ptpt-bocil">${c.ptpt5.bocil}</td><td class="text-right text-ptpt-bocol">${c.ptpt5.bocol}</td><td class="text-right font-bold">${c.ptpt5.total}</td></tr>
+                                <tr><td>PTPT Kelas 6</td><td class="text-right text-ptpt-bocil">${c.ptpt6.bocil}</td><td class="text-right text-ptpt-bocol">${c.ptpt6.bocol}</td><td class="text-right font-bold">${c.ptpt6.total}</td></tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><b>TOTAL</b></td>
+                                    <td class="text-right text-ptpt-bocil" style="font-weight: 800;">${subPtptBocil.toLocaleString()}</td>
+                                    <td class="text-right text-ptpt-bocol" style="font-weight: 800;">${subPtptBocol.toLocaleString()}</td>
+                                    <td class="text-right" style="font-weight: 900;">${subPtpt.toLocaleString()}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
 
@@ -6826,9 +7216,20 @@
         .text-right { text-align: right; }
         .font-bold { font-weight: bold; }
         .section-title { font-size: 9pt; font-weight: 800; color: #92400e; margin: 12px 0 6px 0; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 3px; letter-spacing: 0.3px; }
-        .grid-24 { display: flex; gap: 8px; margin-bottom: 14px; }
-        .col-jenjang { flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; background: #fafafa; font-size: 7.5pt; }
-        .col-jenjang-title { font-weight: 800; font-size: 8pt; text-transform: uppercase; color: #92400e; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 4px; }
+        .grid-24 { display: flex; gap: 8px; margin-bottom: 14px; page-break-inside: avoid; }
+        .col-jenjang { flex: 1; min-width: 0; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 7px; background: #fafafa; font-size: 7.2pt; box-sizing: border-box; }
+        .col-jenjang-title { font-weight: 800; font-size: 7.5pt; text-transform: uppercase; color: #92400e; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .sub-badge-bocil-bocol { font-weight: normal; font-size: 6pt; text-transform: none; }
+        table.tbl-kelas-mini { width: 100%; border-collapse: collapse; font-size: 6.8pt; line-height: 1.25; }
+        table.tbl-kelas-mini th { border-bottom: 1px solid #cbd5e1; padding: 2px 2px; font-weight: 800; font-size: 6pt; text-transform: uppercase; }
+        table.tbl-kelas-mini td { padding: 1.5px 2px; border-bottom: 1px dotted #e2e8f0; vertical-align: middle; }
+        table.tbl-kelas-mini tfoot td { border-top: 1.5px solid #cbd5e1; border-bottom: none; padding: 3px 2px; font-size: 6.8pt; font-weight: 800; background: transparent !important; color: #0f172a !important; }
+        .text-dasar-bocil { color: #b45309; font-weight: 600; }
+        .text-dasar-bocol { color: #c2410c; font-weight: 600; }
+        .text-pra-bocil { color: #0284c7; font-weight: 600; }
+        .text-pra-bocol { color: #1d4ed8; font-weight: 600; }
+        .text-ptpt-bocil { color: #9333ea; font-weight: 600; }
+        .text-ptpt-bocol { color: #6d28d9; font-weight: 600; }
         .row-kelas { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px dotted #e2e8f0; font-size: 7.5pt; }
         .sig-container { margin-top: 20px; display: flex; justify-content: space-between; font-size: 8.5pt; page-break-inside: avoid; }
         .sig-box { text-align: center; width: 220px; }
