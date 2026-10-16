@@ -4410,10 +4410,16 @@ let lastSantriFilterKey = '';
             const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
             let filtered = [...globalSantri];
+            const norm = v => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            const targetTpq = norm(userNama);
+            const targetKec = norm(userKec);
             if (isLembaga) {
-                filtered = filtered.filter(s => (s.namaTpq || '').trim().toLowerCase() === userNama.trim().toLowerCase());
+                filtered = filtered.filter(s => {
+                    const c = norm(s.namaTpq);
+                    return c === targetTpq || c.includes(targetTpq) || targetTpq.includes(c);
+                });
             } else if (isKorcam) {
-                filtered = filtered.filter(s => (s.kecamatan || '').trim().toLowerCase() === userKec.trim().toLowerCase());
+                filtered = filtered.filter(s => norm(s.kecamatan) === targetKec);
             }
 
             if (currentSantriStatusFilter === 'aktif') {
@@ -4550,15 +4556,21 @@ let lastSantriFilterKey = '';
             const isLembaga = !isAdmin && !isKorcam;
             const userNama = loggedUser ? (loggedUser.nama || loggedUser.username) : '';
             const userKec = loggedUser ? (loggedUser.kecamatan || '') : '';
+            const norm = v => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            const targetTpq = norm(userNama);
+            const targetKec = norm(userKec);
 
             const searchInput = document.getElementById('searchInputUstadzah');
             const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
             let filtered = [...globalGuru];
             if (isLembaga) {
-                filtered = filtered.filter(g => (g.namaTpq || '').trim().toLowerCase() === userNama.trim().toLowerCase());
+                filtered = filtered.filter(g => {
+                    const c = norm(g.namaTpq);
+                    return c === targetTpq || c.includes(targetTpq) || targetTpq.includes(c);
+                });
             } else if (isKorcam) {
-                filtered = filtered.filter(g => (g.kecamatan || '').trim().toLowerCase() === userKec.trim().toLowerCase());
+                filtered = filtered.filter(g => norm(g.kecamatan) === targetKec);
             }
 
             if (currentUstadzahStatusFilter === 'aktif') {
@@ -5091,7 +5103,38 @@ let lastSantriFilterKey = '';
 
             const icons = [document.getElementById('iconRefreshStat')];
             icons.forEach(icon => { if(icon) icon.classList.remove('fa-spin'); });
-            
+
+            // Jika sheet rekap (DataSantri) kosong, rekap otomatis dari daftar santri/guru
+            // agar Dashboard & Statistik Eksekutif tetap menampilkan data.
+            if (!Array.isArray(globalData) || globalData.length === 0) {
+                const rekapFields = ['kelas1a','kelas1b','kelas1c','kelas2a','kelas2b','kelas3a','kelas3b','kelas4a','kelas4b','kelas5a','kelas5b','persiapanImtas','persiapanKhotaman','praPtpt1','praPtpt2','praPtpt3','praPtpt4','praPtpt5','ptpt1','ptpt2','ptpt3','ptpt4','ptpt5','ptpt6'];
+                const byTpq = {};
+                (Array.isArray(globalSantri) ? globalSantri : []).forEach(s => {
+                    const namaTpq = String(s.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                    const kec = String(s.kecamatan || '').trim();
+                    if (!byTpq[namaTpq]) {
+                        const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: '', jumlahGuru: 0, total: 0 };
+                        rekapFields.forEach(f => row[f] = 0);
+                        byTpq[namaTpq] = row;
+                    }
+                    const row = byTpq[namaTpq];
+                    row.total++;
+                    const fld = (typeof deteksiKategoriKelasSantri === 'function') ? deteksiKategoriKelasSantri(s) : null;
+                    if (fld && row[fld] !== undefined) row[fld]++;
+                });
+                (Array.isArray(globalGuru) ? globalGuru : []).forEach(g => {
+                    const namaTpq = String(g.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                    const kec = String(g.kecamatan || '').trim();
+                    if (!byTpq[namaTpq]) {
+                        const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: '', jumlahGuru: 0, total: 0 };
+                        rekapFields.forEach(f => row[f] = 0);
+                        byTpq[namaTpq] = row;
+                    }
+                    byTpq[namaTpq].jumlahGuru++;
+                });
+                globalData = Object.values(byTpq);
+            }
+
             renderStatistik();
             onInputKecamatanChange();
             renderRekapKecamatan();
