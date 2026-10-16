@@ -4929,12 +4929,44 @@
             globalData = data || [];
             
             if (Array.isArray(santriList)) {
-                globalSantri = santriList;
-                try { localStorage.setItem(LOCAL_STORAGE_SANTRI_KEY, JSON.stringify(santriList)); } catch(e) {}
+                const normalizedSantri = santriList.map(item => {
+                    const s = { ...(item || {}) };
+                    s.id = s.id || s.ID || s.Id || ('S_' + Math.random().toString(36).slice(2));
+                    s.nama = s.nama || s['Nama Santri'] || s.Nama || s.namaSantri || '';
+                    s.gender = (s.gender || s['L/P'] || 'L').toString().trim().toUpperCase().startsWith('P') ? 'P' : 'L';
+                    s.tempatLahir = s.tempatLahir || s['Tempat Lahir'] || '';
+                    s.tglLahir = s.tglLahir || s['Tanggal Lahir'] || '';
+                    if (!s.ttl && (s.tempatLahir || s.tglLahir)) {
+                        s.ttl = (s.tempatLahir ? s.tempatLahir : '') + (s.tglLahir ? (s.tempatLahir ? ', ' : '') + s.tglLahir : '');
+                    }
+                    s.nis = (s.nis !== undefined && s.nis !== null) ? String(s.nis).trim() : String(s.NIS || '').trim();
+                    s.nisq = (s.nisq !== undefined && s.nisq !== null) ? String(s.nisq).trim() : String(s.NISQ || '').trim();
+                    s.jilidSekarang = s.jilidSekarang || s['Jilid Sekarang'] || s.kelasAwal || s.Jilid || 'Kls 1A';
+                    s.namaTpq = s.namaTpq || s['Nama TPQ'] || s.namaTpqLembaga || '';
+                    s.kecamatan = s.kecamatan || s.Kecamatan || '';
+                    s.status = s.status || s.Status || 'Aktif';
+                    return s;
+                });
+                globalSantri = normalizedSantri;
+                try { localStorage.setItem(LOCAL_STORAGE_SANTRI_KEY, JSON.stringify(normalizedSantri)); } catch(e) {}
             }
             if (Array.isArray(guruList)) {
-                globalGuru = guruList;
-                try { localStorage.setItem(LOCAL_STORAGE_GURU_KEY, JSON.stringify(guruList)); } catch(e) {}
+                const normalizedGuru = guruList.map(item => {
+                    const g = { ...(item || {}) };
+                    g.id = g.id || g.ID || g.Id || ('G_' + Math.random().toString(36).slice(2));
+                    g.nama = g.nama || g['Nama Guru'] || g.Nama || '';
+                    g.gender = (g.gender || g['L/P'] || 'L').toString().trim().toUpperCase().startsWith('P') ? 'P' : 'L';
+                    g.tempatLahir = g.tempatLahir || g['Tempat Lahir'] || '';
+                    g.tglLahir = g.tglLahir || g['Tanggal Lahir'] || '';
+                    g.idGuru = (g.idGuru !== undefined && g.idGuru !== null) ? String(g.idGuru).trim() : String(g['ID Guru Qiraati'] || g['ID Guru'] || '').trim();
+                    g.mulaiMengajar = g.mulaiMengajar || g['Mulai Mengajar'] || '';
+                    g.namaTpq = g.namaTpq || g['Nama TPQ'] || '';
+                    g.kecamatan = g.kecamatan || g.Kecamatan || '';
+                    g.status = g.status || g.Status || 'Aktif';
+                    return g;
+                });
+                globalGuru = normalizedGuru;
+                try { localStorage.setItem(LOCAL_STORAGE_GURU_KEY, JSON.stringify(normalizedGuru)); } catch(e) {}
             }
             if (Array.isArray(kenaikanList)) {
                 globalKenaikan = kenaikanList;
