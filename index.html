@@ -3829,8 +3829,14 @@
 
             const rawUser = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
             const loggedUser = rawUser ? JSON.parse(rawUser) : null;
+            if (!loggedUser) {
+                alert("Anda belum login. Silakan login terlebih dahulu sebelum import data.");
+                return;
+            }
             const userRoleLower = loggedUser && loggedUser.role ? loggedUser.role.toLowerCase() : '';
             const isAdmin = userRoleLower === 'admin';
+            const isKorcam = userRoleLower === 'korcam' || userRoleLower.includes('korcam') || userRoleLower.includes('kecamatan');
+            const isLembaga = !isAdmin && !isKorcam;
             const standardKecList = ["Pakal", "Jambangan", "Kenjeran", "Rungkut", "Gunung Anyar", "Karang Pilang", "Asemrowo", "Benowo"];
             const userKec = standardKecList.find(k => k.toLowerCase() === (loggedUser.kecamatan || '').toLowerCase()) || loggedUser.kecamatan || 'Kenjeran';
             const userNama = loggedUser ? (loggedUser.nama || loggedUser.username) : '';
@@ -3981,6 +3987,10 @@
 
             const rawUser = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
             const loggedUser = rawUser ? JSON.parse(rawUser) : null;
+            if (!loggedUser) {
+                alert("Anda belum login. Silakan login terlebih dahulu sebelum import data guru.");
+                return;
+            }
             const userRoleLower = loggedUser && loggedUser.role ? loggedUser.role.toLowerCase() : '';
             const isAdmin = userRoleLower === 'admin';
             const isKorcam = userRoleLower === 'korcam' || userRoleLower.includes('korcam') || userRoleLower.includes('kecamatan');
@@ -3994,17 +4004,17 @@
             const kecVal = isLembaga ? userKec : (isKorcam ? userKec : (kecEl ? kecEl.value : 'Kenjeran'));
             const tpqVal = isLembaga ? userNama : (tpqEl ? tpqEl.value : '');
 
+            const btn = document.getElementById('btnUploadGuru');
+            const icon = document.getElementById('iconUploadGuru');
+            if (btn) btn.disabled = true;
+            if (icon) icon.className = "fa-solid fa-spinner fa-spin";
+
             if (!tpqVal) {
                 alert("Silakan tentukan / pilih Lembaga TPQ tujuan terlebih dahulu pada formulir di atas sebelum import Excel!");
                 if (btn) btn.disabled = false;
                 if (icon) icon.className = "fa-solid fa-cloud-arrow-up";
                 return;
             }
-
-            const btn = document.getElementById('btnUploadGuru');
-            const icon = document.getElementById('iconUploadGuru');
-            if (btn) btn.disabled = true;
-            if (icon) icon.className = "fa-solid fa-spinner fa-spin";
 
             const reader = new FileReader();
             reader.onload = async function(e) {
