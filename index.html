@@ -4490,17 +4490,18 @@ let lastSantriFilterKey = '';
                     </td>
                     <td class="py-3 px-4 text-center whitespace-nowrap">
                         <div class="inline-flex items-center gap-1">
-                            <button type="button" onclick="openModalEditSantri('${s.id || s.nis}')" title="Edit Data Santri" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs transition-all">
+                            <!-- Tombol Edit disembunyikan: perbaikan data santri dilakukan via Spreadsheet (lebih stabil). -->
+                            <!-- <button type="button" onclick="openModalEditSantri('${s.id || s.nis}')" title="Edit Data Santri" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs transition-all">
                                 <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
+                            </button> -->
                             ${!isNonaktif ? `
                             <button type="button" onclick="pilihSantriUntukKenaikan('${s.nis || s.id}')" title="Catat Kenaikan Jilid" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
                                 <i class="fa-solid fa-arrow-trend-up"></i> Naik
                             </button>
                             ` : ''}
-                            <button type="button" onclick="toggleStatusSantri('${s.id || s.nis}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}')" title="${isNonaktif ? 'Aktifkan Kembali Santri' : 'Nonaktifkan Santri'}" class="p-1.5 ${isNonaktif ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'} rounded-lg text-xs transition-all">
+                            ${(isAdmin || isKorcam) ? `<button type="button" onclick="toggleStatusSantri('${s.id || s.nis}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}')" title="${isNonaktif ? 'Aktifkan Kembali Santri' : 'Nonaktifkan Santri'}" class="p-1.5 ${isNonaktif ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'} rounded-lg text-xs transition-all">
                                 <i class="fa-solid ${isNonaktif ? 'fa-user-check' : 'fa-user-slash'}"></i>
-                            </button>
+                            </button>` : ''}
                         </div>
                     </td>
                 </tr>`;
