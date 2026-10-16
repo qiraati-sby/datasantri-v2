@@ -2665,6 +2665,9 @@
         let globalMutasi = [];
         const LOCAL_STORAGE_MUTASI_KEY = 'qiraati_mutasi_list_real';
         let currentSantriStatusFilter = 'all';
+let santriTablePage = 1;
+let santriRowsPerPage = 50;
+let lastSantriFilterKey = '';
         let currentUstadzahStatusFilter = 'all';
         let currentView = 'dashboard';
 
@@ -4263,7 +4266,7 @@
 
             tbody.innerHTML = list.map((k, idx) => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
+                    <td class="py-3 px-4 text-center font-bold text-slate-400">${santriStart + idx + 1}</td>
                     <td class="py-3 px-4 font-bold text-slate-900">${k.namaSantri || k.nama || '-'}</td>
                     <td class="py-3 px-4 text-center font-semibold text-slate-500">${k.jilidLama || '-'}</td>
                     <td class="py-3 px-4 text-center">
@@ -4430,6 +4433,18 @@
                 );
             }
 
+            const filterKey = (isLembaga ? userNama : '') + '|' + (isKorcam ? userKec : '') + '|' + currentSantriStatusFilter + '|' + q;
+            if (filterKey !== lastSantriFilterKey) {
+                lastSantriFilterKey = filterKey;
+                santriTablePage = 1;
+            }
+
+            const santriTotalPages = Math.max(1, Math.ceil(filtered.length / santriRowsPerPage));
+            if (santriTablePage > santriTotalPages) santriTablePage = santriTotalPages;
+            if (santriTablePage < 1) santriTablePage = 1;
+            const santriStart = (santriTablePage - 1) * santriRowsPerPage;
+            const pageRows = filtered.slice(santriStart, santriStart + santriRowsPerPage);
+
             const badgeCount = document.getElementById('badgeCountSantriDaftar');
             if (badgeCount) badgeCount.textContent = `${filtered.length} Santri`;
 
@@ -4441,7 +4456,7 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map((s, idx) => {
+            tbody.innerHTML = pageRows.map((s, idx) => {
                 const isNonaktif = (s.status || 'Aktif').toLowerCase() === 'nonaktif';
                 return `
                 <tr class="hover:bg-slate-50 transition-colors ${isNonaktif ? 'opacity-65 bg-slate-50/50' : ''}">
@@ -4484,6 +4499,46 @@
                     </td>
                 </tr>`;
             }).join('');
+            renderSantriPagination(filtered.length, santriTablePage, santriRowsPerPage);
+        }
+
+        function changeSantriTablePage(page) {
+            const target = Number(page);
+            if (!Number.isFinite(target)) return;
+            santriTablePage = Math.max(1, target);
+            filterSantriTable();
+        }
+
+        function ensureSantriPaginationBar() {
+            let bar = document.getElementById('santriPagination');
+            if (!bar) {
+                const container = document.getElementById('containerListSantri');
+                if (!container || !container.parentNode) return null;
+                bar = document.createElement('div');
+                bar.id = 'santriPagination';
+                bar.className = 'flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 border-t border-slate-100 bg-slate-50';
+                container.parentNode.insertBefore(bar, container.nextSibling);
+            }
+            return bar;
+        }
+
+        function renderSantriPagination(total, page, perPage) {
+            const bar = ensureSantriPaginationBar();
+            if (!bar) return;
+            if (!total || total <= perPage) {
+                bar.innerHTML = total ? `<span class="text-xs font-bold text-slate-500">Total ${total} data</span>` : '';
+                return;
+            }
+            const totalPages = Math.max(1, Math.ceil(total / perPage));
+            if (page > totalPages) page = totalPages;
+            if (page < 1) page = 1;
+            bar.innerHTML = `
+                <span class="text-xs font-bold text-slate-600">Halaman ${page} dari ${totalPages} &bull; Total ${total} data</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="changeSantriTablePage(${page - 1})" ${page <= 1 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold ${page <= 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-700 hover:bg-white'}">Sebelumnya</button>
+                    <button type="button" onclick="changeSantriTablePage(${page + 1})" ${page >= totalPages ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold ${page >= totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-700 hover:bg-white'}">Berikutnya</button>
+                </div>
+            `;
         }
 
         function filterUstadzahTable() {
