@@ -4955,7 +4955,23 @@ let lastSantriFilterKey = '';
 
             if (GOOGLE_SCRIPT_WEB_APP_URL) {
                 try {
-                    const response = await fetch(GOOGLE_SCRIPT_WEB_APP_URL + '?action=getData');
+                    const rawUser = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
+                    const loggedUser = rawUser ? JSON.parse(rawUser) : null;
+                    const role = loggedUser && loggedUser.role ? String(loggedUser.role) : '';
+                    const roleLower = role.toLowerCase();
+                    const isAdmin = roleLower === 'admin';
+                    const params = new URLSearchParams();
+                    params.set('action', 'getData');
+                    // Lembaga/Korcam hanya menerima data miliknya, mengurangi payload (7000 -> 200-300)
+                    if (!isAdmin) {
+                        const kec = loggedUser && loggedUser.kecamatan ? String(loggedUser.kecamatan).trim() : '';
+                        if (kec && kec.toLowerCase() !== 'semua') params.set('kecamatan', kec);
+                        const isKorcam = roleLower.includes('korcam') || roleLower.includes('kecamatan');
+                        if (!isKorcam && loggedUser && loggedUser.nama) {
+                            params.set('namaTpq', String(loggedUser.nama).trim());
+                        }
+                    }
+                    const response = await fetch(GOOGLE_SCRIPT_WEB_APP_URL + '?' + params.toString());
                     const json = await response.json();
                     onDataLoaded(json.data || json, json.korcam, json.tpqByKecamatan, json.users, json.santri, json.guru, json.kenaikan, json.mutasi);
                     return;
