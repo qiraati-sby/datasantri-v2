@@ -41,22 +41,44 @@ function doGet(e) {
       }
     }
     
-    // B. Membaca Sheet Guru
-    const sheetGuru = ss.getSheetByName("Guru");
+    // B. Membaca Sheet Guru (Mendukung toleransi nama tab & variasi kolom)
+    let sheetGuru = ss.getSheetByName("Guru");
+    if (!sheetGuru) {
+      const allSheets = ss.getSheets();
+      for (let s of allSheets) {
+        const sName = s.getName().trim().toLowerCase();
+        if (sName === 'guru' || sName.includes('guru') || sName === 'ustadzah' || sName.includes('ustadzah')) {
+          sheetGuru = s;
+          break;
+        }
+      }
+    }
     let guruList = [];
     if (sheetGuru && sheetGuru.getLastRow() > 1) {
       const vals = sheetGuru.getDataRange().getValues();
       const headers = vals[0];
       for (let i = 1; i < vals.length; i++) {
+        if (!vals[i] || vals[i].every(c => String(c).trim() === '')) continue;
         let obj = {};
         for (let j = 0; j < headers.length; j++) {
-          let h = headers[j];
+          let h = String(headers[j] || '').trim();
+          if (!h) continue;
           let val = vals[i][j];
           if (val instanceof Date) {
             val = Utilities.formatDate(val, Session.getScriptTimeZone(), "yyyy-MM-dd");
           }
           obj[h] = val;
         }
+        // Alias standar otomatis langsung di sisi backend GAS
+        obj.nama = obj['Nama Guru'] || obj['Nama'] || obj['Nama Lengkap'] || obj['Nama Ustadzah'] || obj.nama || '';
+        obj.namaTpq = obj['Nama Lembaga'] || obj['Nama TPQ'] || obj['Lembaga TPQ'] || obj['Lembaga / TPQ'] || obj['TPQ'] || obj.namaTpq || '';
+        obj.idGuru = (obj['Id Guru'] !== undefined && obj['Id Guru'] !== null && String(obj['Id Guru']).trim() !== '') ? String(obj['Id Guru']).trim() : String(obj['ID Guru Qiraati'] || obj['ID Guru'] || obj['ID'] || obj.idGuru || '').trim();
+        obj.tglLahir = obj['tgl lahir'] || obj['Tanggal Lahir'] || obj['Tgl Lahir'] || obj.tglLahir || '';
+        obj.tempatLahir = obj['Tempat Lahir'] || obj['Tempat'] || obj.tempatLahir || '';
+        obj.mulaiMengajar = obj['Mulai Mengajar'] || obj['TMT'] || obj.mulaiMengajar || '';
+        obj.gender = obj['L/P'] || obj['Jenis Kelamin'] || obj['JK'] || obj.gender || 'L';
+        obj.status = obj['Status'] || obj.status || 'Aktif';
+        obj.kecamatan = obj['Kecamatan'] || obj.kecamatan || '';
         guruList.push(obj);
       }
     }
