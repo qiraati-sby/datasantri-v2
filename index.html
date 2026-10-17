@@ -7,7 +7,14 @@
     <!-- Favicon Resmi Qiraati -->
     <link rel="icon" type="image/png" href="https://e-qiraati.com/img/qiraati_gold.png">
     <link rel="shortcut icon" href="https://e-qiraati.com/img/qiraati_gold.png">
-    <link rel="apple-touch-icon" href="https://e-qiraati.com/img/qiraati_gold.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <!-- Progressive Web App (PWA) Android & Mobile Support -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DataSantri">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -180,7 +187,11 @@
                         <p id="sidebarUserRole" class="text-[10px] font-semibold text-slate-400 truncate">Publik</p>
                     </div>
                 </div>
-                <button type="button" onclick="handleLogout()" id="sidebarBtnAuth" title="Logout" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition-all flex-shrink-0">
+                <button type="button" onclick="triggerPwaInstall()" id="btnInstallPwaAuth" title="Pasang Aplikasi ke Layar Utama Android" class="hidden px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        <span class="hidden sm:inline">Pasang Aplikasi</span>
+                    </button>
+                    <button type="button" onclick="handleLogout()" id="sidebarBtnAuth" title="Logout" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition-all flex-shrink-0">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i>
                 </button>
             </div>
@@ -217,6 +228,10 @@
                     </div>
 
                     <!-- Tombol Login -->
+                    <button type="button" onclick="triggerPwaInstall()" id="btnInstallPwaPublic" title="Pasang Aplikasi ke Layar Utama Android" class="hidden px-3.5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        <span class="hidden sm:inline">Pasang Aplikasi</span>
+                    </button>
                     <button type="button" onclick="switchPublicTab('login')" id="btnPublicLogin" class="px-4 lg:px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-right-to-bracket text-slate-950"></i>
                         <span>Login</span>
@@ -293,6 +308,17 @@
                     <button onclick="fetchSheetData()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold text-xs transition-all shadow-md shadow-amber-200/50 flex items-center justify-center gap-2 cursor-pointer">
                         <i id="iconRefreshStat" class="fa-solid fa-rotate"></i> Sinkronisasi
                     </button>
+                </div>
+            </div>
+
+            <!-- Notifikasi Periode Kosong (Jika Periode yang dipilih belum memiliki data) -->
+            <div id="noticeDashboardDataKosong" class="hidden bg-amber-50 border border-amber-200 rounded-3xl p-4 sm:p-5 text-amber-900 shadow-sm flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center text-lg flex-shrink-0 font-bold">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h4 class="font-black text-sm" id="noticeDataKosongJudul">Data Rekapitulasi Kosong</h4>
+                    <p class="text-xs text-amber-700 mt-0.5 font-medium" id="noticeDataKosongDesc">Belum ada riwayat data santri yang tersimpan untuk periode ini.</p>
                 </div>
             </div>
 
@@ -2689,7 +2715,7 @@ let lastSantriFilterKey = '';
         let currentView = 'dashboard';
 
         // ================= SISTEM AUTO-REKAP BULANAN & ARSIP HISTORIS DASHBOARD =================
-        const LOCAL_STORAGE_AUTOREKAP_HISTORY_KEY = 'qiraati_autorekap_history_v1';
+        const LOCAL_STORAGE_AUTOREKAP_HISTORY_KEY = 'qiraati_autorekap_history_v2';
         let currentDashboardPeriode = 'live'; // 'live' atau 'YYYY-MM'
         let globalAutoRekapHistory = {};
 
@@ -2803,9 +2829,14 @@ let lastSantriFilterKey = '';
             const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
             const prevKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
 
-            // Jika bulan lalu belum ada di arsip, freeze data sebagai snapshot bulan lalu
-            if (!globalAutoRekapHistory[prevKey] && Array.isArray(globalSantri) && globalSantri.length > 0) {
-                globalAutoRekapHistory[prevKey] = generateLiveAutoRekap(prevKey);
+            // PENTING: Jangan membuat data tiruan untuk bulan lalu (misal September).
+            // Bulan lalu hanya memiliki data jika memang tercatat di Google Sheets atau dari hasil cutoff tersimpan.
+            // Bersihkan data tiruan bulan lalu jika sebelumnya pernah tersimpan secara sintetis:
+            if (globalAutoRekapHistory[prevKey] && !globalAutoRekapHistory[prevKey].isRealData) {
+                delete globalAutoRekapHistory[prevKey];
+            }
+            if (globalAutoRekapHistory['2026-09'] && !globalAutoRekapHistory['2026-09'].isRealData) {
+                delete globalAutoRekapHistory['2026-09'];
             }
 
             // Sync juga data dari Google Sheets jika mengandung properti item.bulan
@@ -2852,6 +2883,12 @@ let lastSantriFilterKey = '';
             const sortedPeriods = Array.from(periodSet).filter(p => p && p.includes('-')).sort().reverse();
 
             let optionsHtml = `<option value="live" ${currentDashboardPeriode === 'live' ? 'selected' : ''}>${currentLabel} (Live)</option>`;
+
+            // Pastikan bulan lalu (misal September 2026) selalu tersedia sebagai pilihan periode
+            const nowForDrop = new Date();
+            const prevMoDate = new Date(nowForDrop.getFullYear(), nowForDrop.getMonth() - 1, 1);
+            const prevMoKey = `${prevMoDate.getFullYear()}-${String(prevMoDate.getMonth() + 1).padStart(2, '0')}`;
+            periodSet.add(prevMoKey);
 
             sortedPeriods.forEach(p => {
                 if (p === currentKey) return;
@@ -5532,9 +5569,16 @@ let lastSantriFilterKey = '';
             } else {
                 activeData = (globalData || []).filter(d => String(d.bulan || '').trim() === currentDashboardPeriode);
                 if (activeData.length === 0) {
-                    const fallbackSnap = generateLiveAutoRekap(currentDashboardPeriode);
-                    activeData = fallbackSnap.rows;
-                    activeCountUsia = fallbackSnap.countUsia;
+                    // Data periode lampau memang kosong, kosongkan seluruh rekap dan metrik usia
+                    activeData = [];
+                    activeCountUsia = {
+                        'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
+                        'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
+                        'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
+                        'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
+                        'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
+                        'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
+                    };
                 }
             }
 
@@ -5552,6 +5596,19 @@ let lastSantriFilterKey = '';
             }
             if (labelPeriode) {
                 labelPeriode.textContent = getLabelBulanTahunIndo(currentDashboardPeriode === 'live' ? currentKey : currentDashboardPeriode);
+            }
+
+            const noticeEl = document.getElementById('noticeDashboardDataKosong');
+            const noticeJudul = document.getElementById('noticeDataKosongJudul');
+            const noticeDesc = document.getElementById('noticeDataKosongDesc');
+            if (noticeEl) {
+                if (!isLive && activeData.length === 0) {
+                    noticeEl.classList.remove('hidden');
+                    if (noticeJudul) noticeJudul.textContent = `Data Rekapitulasi ${getLabelBulanTahunIndo(currentDashboardPeriode)} Kosong`;
+                    if (noticeDesc) noticeDesc.textContent = `Periode ini belum memiliki catatan data santri / rekapitulasi di sistem (Semua metrik bernilai 0).`;
+                } else {
+                    noticeEl.classList.add('hidden');
+                }
             }
 
             const totalTpq = activeData.length;
@@ -7654,6 +7711,53 @@ let lastSantriFilterKey = '';
                 pri.focus();
                 pri.print();
             }, 400);
+        }
+            // ================= SERVICE WORKER & PWA INSTALL LOGIC =================
+        let deferredPwaPrompt = null;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    console.log('PWA ServiceWorker terdaftar:', reg.scope);
+                }).catch(err => {
+                    console.warn('PWA ServiceWorker gagal:', err);
+                });
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPwaPrompt = e;
+            const b1 = document.getElementById('btnInstallPwaPublic');
+            const b2 = document.getElementById('btnInstallPwaAuth');
+            if (b1) b1.classList.remove('hidden');
+            if (b2) b2.classList.remove('hidden');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('Aplikasi DataSantri berhasil dipasang di perangkat!');
+            deferredPwaPrompt = null;
+            const b1 = document.getElementById('btnInstallPwaPublic');
+            const b2 = document.getElementById('btnInstallPwaAuth');
+            if (b1) b1.classList.add('hidden');
+            if (b2) b2.classList.add('hidden');
+        });
+
+        function triggerPwaInstall() {
+            if (deferredPwaPrompt) {
+                deferredPwaPrompt.prompt();
+                deferredPwaPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User menerima pemasangan aplikasi');
+                    }
+                    deferredPwaPrompt = null;
+                    const b1 = document.getElementById('btnInstallPwaPublic');
+                    const b2 = document.getElementById('btnInstallPwaAuth');
+                    if (b1) b1.classList.add('hidden');
+                    if (b2) b2.classList.add('hidden');
+                });
+            } else {
+                alert("Petunjuk Pemasangan Aplikasi di Android:\n\n1. Buka situs ini melalui Google Chrome pada HP Android Anda.\n2. Ketuk ikon titik tiga (⋮) di sudut kanan atas browser.\n3. Pilih menu 'Tambahkan ke Layar Utama' (Add to Home screen) atau 'Pasang Aplikasi'.\n4. Ikon aplikasi DataSantri akan langsung terpasang di layar utama HP Anda dan dapat dibuka selayaknya aplikasi Android.");
+            }
         }
     </script>
 </body>
