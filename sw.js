@@ -1,4 +1,4 @@
-const CACHE_NAME = 'datasantri-qiraati-v3';
+const CACHE_NAME = 'datasantri-qiraati-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
