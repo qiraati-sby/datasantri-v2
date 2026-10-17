@@ -271,12 +271,29 @@
         <section id="section-statistik" class="space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
                 <div>
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span id="badgeDashboardLiveStatus" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Auto-Rekap (Live)
+                        </span>
+                        <span id="labelDashboardPeriodeAktif" class="text-xs font-bold text-slate-500">Oktober 2026</span>
+                    </div>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900">Dashboard & Statistik Eksekutif</h2>
-                    <p class="text-sm font-medium text-slate-500">Analisis komprehensif perkembangan santri dan sebaran lembaga TPQ se-Kota Surabaya.</p>
+                    <p class="text-xs sm:text-sm font-medium text-slate-500">Analisis komprehensif perkembangan santri dan sebaran lembaga TPQ se-Kota Surabaya.</p>
                 </div>
-                <button onclick="fetchSheetData()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-amber-200/50 flex items-center justify-center gap-2 self-start">
-                    <i id="iconRefreshStat" class="fa-solid fa-rotate"></i> Sinkronisasi Data
-                </button>
+                <div class="flex flex-wrap items-center gap-2.5 self-start md:self-center">
+                    <!-- Dropdown Pemilih Periode Rekap Bulanan -->
+                    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 hover:border-amber-400 rounded-2xl px-3 py-2 shadow-xs transition-all">
+                        <i class="fa-solid fa-calendar-days text-amber-600 text-xs"></i>
+                        <label for="selectPeriodeDashboard" class="text-xs font-bold text-slate-600 hidden sm:inline">Periode:</label>
+                        <select id="selectPeriodeDashboard" onchange="onPeriodeDashboardChange()" class="bg-transparent text-xs font-extrabold text-slate-900 outline-none cursor-pointer pr-1">
+                            <!-- Diisi dinamis oleh JavaScript -->
+                        </select>
+                    </div>
+
+                    <button onclick="fetchSheetData()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold text-xs transition-all shadow-md shadow-amber-200/50 flex items-center justify-center gap-2 cursor-pointer">
+                        <i id="iconRefreshStat" class="fa-solid fa-rotate"></i> Sinkronisasi
+                    </button>
+                </div>
             </div>
 
             <!-- Kartu Statistik Utama (6 Kategori Terpisah) -->
@@ -2671,6 +2688,188 @@ let lastSantriFilterKey = '';
         let currentUstadzahStatusFilter = 'all';
         let currentView = 'dashboard';
 
+        // ================= SISTEM AUTO-REKAP BULANAN & ARSIP HISTORIS DASHBOARD =================
+        const LOCAL_STORAGE_AUTOREKAP_HISTORY_KEY = 'qiraati_autorekap_history_v1';
+        let currentDashboardPeriode = 'live'; // 'live' atau 'YYYY-MM'
+        let globalAutoRekapHistory = {};
+
+        try {
+            const savedHistory = localStorage.getItem(LOCAL_STORAGE_AUTOREKAP_HISTORY_KEY);
+            if (savedHistory) globalAutoRekapHistory = JSON.parse(savedHistory);
+        } catch(e) {
+            console.error("Gagal membaca riwayat auto-rekap:", e);
+            globalAutoRekapHistory = {};
+        }
+
+        const NAMA_BULAN_LENGKAP_INDO = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        function getPeriodeBulanSekarangKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function getLabelBulanTahunIndo(keyBulan) {
+            if (!keyBulan || keyBulan === 'live') return 'Bulan Berjalan (Live)';
+            const parts = keyBulan.split('-');
+            if (parts.length >= 2) {
+                const yr = parts[0];
+                const moIdx = parseInt(parts[1], 10) - 1;
+                if (moIdx >= 0 && moIdx < 12) {
+                    return `${NAMA_BULAN_LENGKAP_INDO[moIdx]} ${yr}`;
+                }
+            }
+            return keyBulan;
+        }
+
+        // Generate data rekap 24 kelas per TPQ dari daftar santri & guru aktif terkini
+        function generateLiveAutoRekap(bulanKey) {
+            const rekapFields = ['kelas1a','kelas1b','kelas1c','kelas2a','kelas2b','kelas3a','kelas3b','kelas4a','kelas4b','kelas5a','kelas5b','persiapanImtas','persiapanKhotaman','praPtpt1','praPtpt2','praPtpt3','praPtpt4','praPtpt5','ptpt1','ptpt2','ptpt3','ptpt4','ptpt5','ptpt6'];
+            const byTpq = {};
+            const bKey = bulanKey || getPeriodeBulanSekarangKey();
+
+            // 1. Akumulasi santri aktif ke 24 kelas
+            (Array.isArray(globalSantri) ? globalSantri : []).forEach(s => {
+                if ((s.status || 'Aktif').toLowerCase() === 'nonaktif') return;
+
+                const namaTpq = String(s.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                const kec = String(s.kecamatan || '').trim();
+                if (!byTpq[namaTpq]) {
+                    const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: bKey, jumlahGuru: 0, total: 0 };
+                    rekapFields.forEach(f => row[f] = 0);
+                    byTpq[namaTpq] = row;
+                }
+                const row = byTpq[namaTpq];
+                row.total++;
+                const fld = (typeof deteksiKategoriKelasSantri === 'function') ? deteksiKategoriKelasSantri(s) : null;
+                if (fld && row[fld] !== undefined) row[fld]++;
+            });
+
+            // 2. Akumulasi guru aktif per TPQ
+            (Array.isArray(globalGuru) ? globalGuru : []).forEach(g => {
+                if ((g.status || 'Aktif').toLowerCase() === 'nonaktif') return;
+
+                const namaTpq = String(g.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                const kec = String(g.kecamatan || '').trim();
+                if (!byTpq[namaTpq]) {
+                    const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: bKey, jumlahGuru: 0, total: 0 };
+                    rekapFields.forEach(f => row[f] = 0);
+                    byTpq[namaTpq] = row;
+                }
+                byTpq[namaTpq].jumlahGuru++;
+            });
+
+            // 3. Hitung demografi Bocil vs Bocol
+            let countUsia = {
+                'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
+                'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
+                'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
+                'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
+                'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
+                'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
+            };
+
+            (Array.isArray(globalSantri) ? globalSantri : []).forEach(s => {
+                if ((s.status || 'Aktif').toLowerCase() === 'nonaktif') return;
+                const info = getKategoriBocilBocol(s);
+                const key = `${info.jenjang}_${info.status}`;
+                if (countUsia[key]) {
+                    const isPerempuan = String(s.gender || s.jenisKelamin || '').toUpperCase().startsWith('P');
+                    if (isPerempuan) countUsia[key].p++;
+                    else countUsia[key].l++;
+                    countUsia[key].total++;
+                }
+            });
+
+            return {
+                bulan: bKey,
+                rows: Object.values(byTpq),
+                countUsia: countUsia,
+                totalSantri: Object.values(byTpq).reduce((acc, r) => acc + (r.total || 0), 0),
+                totalGuru: Object.values(byTpq).reduce((acc, r) => acc + (r.jumlahGuru || 0), 0),
+                totalTpq: Object.keys(byTpq).length,
+                updatedAt: new Date().toISOString()
+            };
+        }
+
+        // Pemeriksaan otomatis awal bulan untuk membekukan rekap bulan lalu
+        function checkAndSyncMonthlyArchives() {
+            const now = new Date();
+            const currentKey = getPeriodeBulanSekarangKey();
+
+            // Hitung kunci bulan lalu (1 bulan ke belakang)
+            const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const prevKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+
+            // Jika bulan lalu belum ada di arsip, freeze data sebagai snapshot bulan lalu
+            if (!globalAutoRekapHistory[prevKey] && Array.isArray(globalSantri) && globalSantri.length > 0) {
+                globalAutoRekapHistory[prevKey] = generateLiveAutoRekap(prevKey);
+            }
+
+            // Sync juga data dari Google Sheets jika mengandung properti item.bulan
+            if (Array.isArray(globalData)) {
+                const sheetByBulan = {};
+                globalData.forEach(item => {
+                    if (item.bulan && String(item.bulan).trim()) {
+                        const b = String(item.bulan).trim();
+                        if (!sheetByBulan[b]) sheetByBulan[b] = [];
+                        sheetByBulan[b].push(item);
+                    }
+                });
+                Object.keys(sheetByBulan).forEach(b => {
+                    if (!globalAutoRekapHistory[b]) {
+                        globalAutoRekapHistory[b] = {
+                            bulan: b,
+                            rows: sheetByBulan[b],
+                            totalSantri: sheetByBulan[b].reduce((acc, r) => acc + (r.total || 0), 0),
+                            totalGuru: sheetByBulan[b].reduce((acc, r) => acc + (r.jumlahGuru || 0), 0),
+                            totalTpq: sheetByBulan[b].length,
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                });
+            }
+
+            try {
+                localStorage.setItem(LOCAL_STORAGE_AUTOREKAP_HISTORY_KEY, JSON.stringify(globalAutoRekapHistory));
+            } catch(e) {}
+
+            populatePeriodeDashboardDropdown();
+        }
+
+        function populatePeriodeDashboardDropdown() {
+            const select = document.getElementById('selectPeriodeDashboard');
+            if (!select) return;
+
+            const currentKey = getPeriodeBulanSekarangKey();
+            const currentLabel = getLabelBulanTahunIndo(currentKey);
+
+            const periodSet = new Set(Object.keys(globalAutoRekapHistory));
+            periodSet.add(currentKey);
+
+            const sortedPeriods = Array.from(periodSet).filter(p => p && p.includes('-')).sort().reverse();
+
+            let optionsHtml = `<option value="live" ${currentDashboardPeriode === 'live' ? 'selected' : ''}>${currentLabel} (Live)</option>`;
+
+            sortedPeriods.forEach(p => {
+                if (p === currentKey) return;
+                const label = getLabelBulanTahunIndo(p);
+                const isSelected = (currentDashboardPeriode === p) ? 'selected' : '';
+                optionsHtml += `<option value="${p}" ${isSelected}>${label} (Arsip)</option>`;
+            });
+
+            select.innerHTML = optionsHtml;
+        }
+
+        function onPeriodeDashboardChange() {
+            const select = document.getElementById('selectPeriodeDashboard');
+            if (!select) return;
+            currentDashboardPeriode = select.value;
+            renderStatistik();
+        }
+
         // Cache Akun Default untuk Login Super Cepat (0.01 detik)
         let cachedUsersList = [];
         try {
@@ -3221,6 +3420,7 @@ let lastSantriFilterKey = '';
                 bulanInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             }
             fetchSheetData();
+            checkAndSyncMonthlyArchives();
             checkAuthSession();
             updateAuthUIState();
             renderRekapBulanan();
@@ -3700,6 +3900,10 @@ let lastSantriFilterKey = '';
 
             populateSantriDropdownKenaikan();
             renderDataListTables();
+            // Refresh auto-rekap live di dashboard agar data kenaikan kelas langsung tampak
+            if (currentDashboardPeriode === 'live' || currentDashboardPeriode === getPeriodeBulanSekarangKey()) {
+                renderStatistik();
+            }
         }
 
         // ================= SUBMIT DATA GURU =================
@@ -5136,6 +5340,7 @@ let lastSantriFilterKey = '';
                 globalData = Object.values(byTpq);
             }
 
+            checkAndSyncMonthlyArchives();
             renderStatistik();
             onInputKecamatanChange();
             renderRekapKecamatan();
@@ -5308,7 +5513,48 @@ let lastSantriFilterKey = '';
 
         // ================= RENDER STATISTIK & GRAFIK PROFESIONAL =================
         function renderStatistik() {
-            const totalTpq = globalData.length;
+            const currentKey = getPeriodeBulanSekarangKey();
+            const isLive = (currentDashboardPeriode === 'live' || currentDashboardPeriode === currentKey);
+
+            let activeData = [];
+            let activeCountUsia = null;
+
+            if (isLive) {
+                // Selalu generate real-time dari data santri dan guru aktif
+                // Kenaikan jilid dan penambahan santri langsung mempengaruhi rekap live
+                const liveSnapshot = generateLiveAutoRekap(currentKey);
+                activeData = liveSnapshot.rows;
+                activeCountUsia = liveSnapshot.countUsia;
+            } else if (globalAutoRekapHistory[currentDashboardPeriode]) {
+                const hist = globalAutoRekapHistory[currentDashboardPeriode];
+                activeData = hist.rows || hist.data || [];
+                activeCountUsia = hist.countUsia || null;
+            } else {
+                activeData = (globalData || []).filter(d => String(d.bulan || '').trim() === currentDashboardPeriode);
+                if (activeData.length === 0) {
+                    const fallbackSnap = generateLiveAutoRekap(currentDashboardPeriode);
+                    activeData = fallbackSnap.rows;
+                    activeCountUsia = fallbackSnap.countUsia;
+                }
+            }
+
+            // Update badge dan teks periode di header Dashboard
+            const badgeLive = document.getElementById('badgeDashboardLiveStatus');
+            const labelPeriode = document.getElementById('labelDashboardPeriodeAktif');
+            if (badgeLive) {
+                if (isLive) {
+                    badgeLive.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200";
+                    badgeLive.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Auto-Rekap (Live)';
+                } else {
+                    badgeLive.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200";
+                    badgeLive.innerHTML = '<i class="fa-solid fa-box-archive text-[9px]"></i> Arsip Rekap';
+                }
+            }
+            if (labelPeriode) {
+                labelPeriode.textContent = getLabelBulanTahunIndo(currentDashboardPeriode === 'live' ? currentKey : currentDashboardPeriode);
+            }
+
+            const totalTpq = activeData.length;
             let totalSantri = 0;
             let totalGuru = 0;
             let totalDasar = 0;
@@ -5326,7 +5572,7 @@ let lastSantriFilterKey = '';
             let sumPra1 = 0, sumPra2 = 0, sumPra3 = 0, sumPra4 = 0, sumPra5 = 0;
             let sumPtpt1 = 0, sumPtpt2 = 0, sumPtpt3 = 0, sumPtpt4 = 0, sumPtpt5 = 0, sumPtpt6 = 0;
 
-            globalData.forEach(item => {
+            activeData.forEach(item => {
                 const dasar = (item.kelas1a||0)+(item.kelas1b||0)+(item.kelas1c||0)+(item.kelas2a||0)+(item.kelas2b||0)+(item.kelas3a||0)+(item.kelas3b||0)+(item.kelas4a||0)+(item.kelas4b||0)+(item.kelas5a||0)+(item.kelas5b||0)+(item.persiapanImtas||0)+(item.persiapanKhotaman||0);
                 const praReal = (item.praPtpt1||0)+(item.praPtpt2||0)+(item.praPtpt3||0)+(item.praPtpt4||0)+(item.praPtpt5||0);
                 const ptpt = (item.ptpt1||0)+(item.ptpt2||0)+(item.ptpt3||0)+(item.ptpt4||0)+(item.ptpt5||0)+(item.ptpt6||0);
@@ -5548,31 +5794,36 @@ let lastSantriFilterKey = '';
             });
 
             // ================= KALKULASI STATISTIK KATEGORI USIA SANTRI (BOCIL vs BOCOL) =================
-            let countUsia = {
-                'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
-                'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
-                'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
-                'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
-                'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
-                'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
-            };
+            let countUsia;
+            if (activeCountUsia) {
+                countUsia = activeCountUsia;
+            } else {
+                countUsia = {
+                    'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
+                    'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
+                    'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
+                    'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
+                    'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
+                    'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
+                };
 
-            let santriWithDobCount = 0;
-            if (Array.isArray(globalSantri) && globalSantri.length > 0) {
-                globalSantri.forEach(s => {
-                    const info = getKategoriBocilBocol(s);
-                    const key = `${info.jenjang}_${info.status}`;
-                    if (countUsia[key]) {
-                        santriWithDobCount++;
-                        const isPerempuan = String(s.gender || s.jenisKelamin || '').toUpperCase().startsWith('P');
-                        if (isPerempuan) {
-                            countUsia[key].p++;
-                        } else {
-                            countUsia[key].l++;
+                let santriWithDobCount = 0;
+                if (Array.isArray(globalSantri) && globalSantri.length > 0) {
+                    globalSantri.forEach(s => {
+                        const info = getKategoriBocilBocol(s);
+                        const key = `${info.jenjang}_${info.status}`;
+                        if (countUsia[key]) {
+                            santriWithDobCount++;
+                            const isPerempuan = String(s.gender || s.jenisKelamin || '').toUpperCase().startsWith('P');
+                            if (isPerempuan) {
+                                countUsia[key].p++;
+                            } else {
+                                countUsia[key].l++;
+                            }
+                            countUsia[key].total++;
                         }
-                        countUsia[key].total++;
-                    }
-                });
+                    });
+                }
             }
 
             // Update 6 Kartu Metrik Kategori Usia
