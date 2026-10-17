@@ -166,7 +166,6 @@ function doGet(e) {
       kenaikan: kenaikanList,
       mutasi: mutasiList,
       data: dataList,
-      users: usersList,
       tpqByKecamatan: tpqByKec,
       korcam: korcamMap
     })).setMimeType(ContentService.MimeType.JSON);
@@ -177,13 +176,16 @@ function doGet(e) {
     const sheetUsers = ss.getSheetByName("Users");
     const user = String(e.parameter.username || '').toLowerCase().trim();
     const pass = String(e.parameter.password || '').trim();
+    const passHash = String(e.parameter.passwordHash || '').trim();
+    // Bandingkan dengan hash: klien mengirim passwordHash (SHA-256), fallback hash di sisi server
+    const inputHash = passHash || sha256Hex(pass);
     
     if (sheetUsers && sheetUsers.getLastRow() > 1) {
       const data = sheetUsers.getDataRange().getValues();
       for (let i = 1; i < data.length; i++) {
         const uSheet = String(data[i][0]).toLowerCase().trim();
         const pSheet = String(data[i][1]).trim();
-        if (uSheet === user && pSheet === pass) {
+        if (uSheet === user && pSheet === inputHash) {
           return ContentService.createTextOutput(JSON.stringify({
             status: 'success', 
             user: {
@@ -592,15 +594,15 @@ function setupAwalSpreadsheet() {
   if (!sheetUsers) {
     sheetUsers = ss.insertSheet("Users");
     sheetUsers.appendRow(headersUsers);
-    sheetUsers.appendRow(["admin", "qiraati2026", "Pengurus Cabang Surabaya", "Semua", "Admin"]);
-    sheetUsers.appendRow(["korcam_kenjeran", "qiraati123", "Koordinator Wilayah Kenjeran", "Kenjeran", "Korcam"]);
-    sheetUsers.appendRow(["darulhaq", "qiraati123", "DARUL HAQ", "Kenjeran", "Lembaga"]);
-    sheetUsers.appendRow(["alislami", "qiraati123", "AL ISLAMI", "Kenjeran", "Lembaga"]);
-    sheetUsers.appendRow(["nabaussalam", "qiraati123", "NABAUSSALAM", "Kenjeran", "Lembaga"]);
+    sheetUsers.appendRow(["admin", sha256Hex("qiraati2026"), "Pengurus Cabang Surabaya", "Semua", "Admin"]);
+    sheetUsers.appendRow(["korcam_kenjeran", sha256Hex("qiraati123"), "Koordinator Wilayah Kenjeran", "Kenjeran", "Korcam"]);
+    sheetUsers.appendRow(["darulhaq", sha256Hex("qiraati123"), "DARUL HAQ", "Kenjeran", "Lembaga"]);
+    sheetUsers.appendRow(["alislami", sha256Hex("qiraati123"), "AL ISLAMI", "Kenjeran", "Lembaga"]);
+    sheetUsers.appendRow(["nabaussalam", sha256Hex("qiraati123"), "NABAUSSALAM", "Kenjeran", "Lembaga"]);
   } else if (sheetUsers.getLastRow() === 0) {
     sheetUsers.appendRow(headersUsers);
-    sheetUsers.appendRow(["admin", "qiraati2026", "Pengurus Cabang Surabaya", "Semua", "Admin"]);
-    sheetUsers.appendRow(["korcam_kenjeran", "qiraati123", "Koordinator Wilayah Kenjeran", "Kenjeran", "Korcam"]);
+    sheetUsers.appendRow(["admin", sha256Hex("qiraati2026"), "Pengurus Cabang Surabaya", "Semua", "Admin"]);
+    sheetUsers.appendRow(["korcam_kenjeran", sha256Hex("qiraati123"), "Koordinator Wilayah Kenjeran", "Kenjeran", "Korcam"]);
   }
   formatHeaderSheet(sheetUsers, "#1e293b"); // Slate 900
   
@@ -705,4 +707,14 @@ function formatHeaderSheet(sheet, headerBgColor) {
   } catch(e) {
     Logger.log("Info format header: " + e.toString());
   }
+}
+
+// Fungsi bantu hashing SHA-256 untuk menyimpan/membandingkan password dalam bentuk hash (bukan plaintext)
+function sha256Hex(str) {
+  const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, str);
+  const hex = [];
+  for (let i = 0; i < bytes.length; i++) {
+    hex.push((bytes[i] & 0xff).toString(16).padStart(2, '0'));
+  }
+  return hex.join('');
 }
