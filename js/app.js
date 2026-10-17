@@ -1,4 +1,4 @@
-﻿// Konfigurasi URL Google Apps Script Web App (Terkoneksi langsung ke Google Spreadsheet)
+// Konfigurasi URL Google Apps Script Web App (Terkoneksi langsung ke Google Spreadsheet)
         const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbztyMICYVpwbIvo7nLSiYxxGBJfJcMdI33pI40yTlQLj7cJfihDR6sbg0N6uhg_o6lc/exec";
 
         let globalData = [];
@@ -9,17 +9,38 @@
         let currentChartFilter = 'all'; // 'all', 'dasar', 'pra', 'ptpt'
 
         // ================= FUNGSI KALKULATOR USIA & MASA MENGAJAR =================
+        function parseUniversalDate(dateStr) {
+            if (!dateStr) return null;
+            let s = String(dateStr).trim();
+            if (!s || s === '-' || s === 'null' || s === 'undefined') return null;
+
+            // ISO format: YYYY-MM-DD or YYYY/MM/DD
+            const isoMatch = s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+            if (isoMatch) {
+                return new Date(parseInt(isoMatch[1], 10), parseInt(isoMatch[2], 10) - 1, parseInt(isoMatch[3], 10));
+            }
+
+            // Indonesian / common format: DD-MM-YYYY or DD/MM/YYYY
+            const dmyMatch = s.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+            if (dmyMatch) {
+                return new Date(parseInt(dmyMatch[3], 10), parseInt(dmyMatch[2], 10) - 1, parseInt(dmyMatch[1], 10));
+            }
+
+            // 4 digit year only: YYYY (misal mulai mengajar tahun 2018)
+            const yearMatch = s.match(/^(\d{4})$/);
+            if (yearMatch) {
+                return new Date(parseInt(yearMatch[1], 10), 0, 1);
+            }
+
+            const d = new Date(s);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
         // 1. Hitung Usia Santri Detail: Tahun - Bulan - Hari
         function hitungUsiaSantriDetail(tglLahirStr) {
             if (!tglLahirStr) return '-';
-            let str = String(tglLahirStr).trim();
-            let datePart = str;
-            const match = str.match(/\d{4}-\d{2}-\d{2}/);
-            if (match) {
-                datePart = match[0];
-            }
-            const dob = new Date(datePart);
-            if (isNaN(dob.getTime())) return '-';
+            const dob = parseUniversalDate(tglLahirStr);
+            if (!dob) return '-';
 
             const today = new Date();
             if (dob > today) return '-';
@@ -49,14 +70,8 @@
         // 2. Hitung Usia Guru: Cukup Tahun & Bulan saja
         function hitungUsiaGuruTahunBulan(tglLahirStr) {
             if (!tglLahirStr) return '-';
-            let str = String(tglLahirStr).trim();
-            let datePart = str;
-            const match = str.match(/\d{4}-\d{2}-\d{2}/);
-            if (match) {
-                datePart = match[0];
-            }
-            const dob = new Date(datePart);
-            if (isNaN(dob.getTime())) return '-';
+            const dob = parseUniversalDate(tglLahirStr);
+            if (!dob) return '-';
 
             const today = new Date();
             if (dob > today) return '-';
@@ -73,21 +88,15 @@
 
             let parts = [];
             if (years > 0) parts.push(`${years} th`);
-            if (months > 0 || years > 0) parts.push(`${months} bln`);
+            if (months > 0 || years === 0) parts.push(`${months} bln`);
             return parts.length > 0 ? parts.join(' ') : '0 bln';
         }
 
         // 3. Hitung Lama Mengajar Guru: Cukup Tahun & Bulan saja
         function hitungLamaMengajarTahunBulan(tglMulaiStr) {
             if (!tglMulaiStr) return '-';
-            let str = String(tglMulaiStr).trim();
-            let datePart = str;
-            const match = str.match(/\d{4}-\d{2}-\d{2}/);
-            if (match) {
-                datePart = match[0];
-            }
-            const dStart = new Date(datePart);
-            if (isNaN(dStart.getTime())) return '-';
+            const dStart = parseUniversalDate(tglMulaiStr);
+            if (!dStart) return '-';
 
             const today = new Date();
             if (dStart > today) return '-';
@@ -104,7 +113,7 @@
 
             let parts = [];
             if (years > 0) parts.push(`${years} th`);
-            if (months > 0 || years > 0) parts.push(`${months} bln`);
+            if (months > 0 || years === 0) parts.push(`${months} bln`);
             return parts.length > 0 ? parts.join(' ') : '< 1 bln';
         }
 
@@ -112,11 +121,8 @@
         // Hitung umur eksak: tahun dan selisih hari setelah ulang tahun terakhir
         function getDetailUmurSantri(tglLahirStr) {
             if (!tglLahirStr) return null;
-            let str = String(tglLahirStr).trim();
-            const match = str.match(/\d{4}-\d{2}-\d{2}/);
-            const datePart = match ? match[0] : str;
-            const dob = new Date(datePart);
-            if (isNaN(dob.getTime())) return null;
+            const dob = parseUniversalDate(tglLahirStr);
+            if (!dob) return null;
 
             const today = new Date();
             if (dob > today) return null;
@@ -2252,7 +2258,7 @@ async function handleLoginSubmit(event) {
 
             tbody.innerHTML = list.map((k, idx) => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 text-center font-bold text-slate-400">${santriStart + idx + 1}</td>
+                    <td class="py-3 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
                     <td class="py-3 px-4 font-bold text-slate-900">${k.namaSantri || k.nama || '-'}</td>
                     <td class="py-3 px-4 text-center font-semibold text-slate-500">${k.jilidLama || '-'}</td>
                     <td class="py-3 px-4 text-center">
@@ -2995,26 +3001,47 @@ async function handleLoginSubmit(event) {
             onDataLoaded(parsedData, null, null, null, parsedSantri, parsedGuru, parsedKenaikan, parsedMutasi);
         }
 
+        // Helper fleksibel untuk mengekstrak field spreadsheet dengan toleransi variasi nama kolom & huruf besar/kecil
+        function getFlexibleField(item, ...candidates) {
+            if (!item || typeof item !== 'object') return '';
+            for (const c of candidates) {
+                if (item[c] !== undefined && item[c] !== null && String(item[c]).trim() !== '') {
+                    return String(item[c]).trim();
+                }
+            }
+            const cleanCandidates = candidates.map(c => String(c).toLowerCase().replace(/[^a-z0-9]/g, ''));
+            for (const [k, v] of Object.entries(item)) {
+                if (v === undefined || v === null || String(v).trim() === '') continue;
+                const cleanK = String(k).toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (cleanCandidates.includes(cleanK)) {
+                    return String(v).trim();
+                }
+            }
+            return '';
+        }
+
         function onDataLoaded(data, korcamMap, tpqMap, usersList, santriList, guruList, kenaikanList, mutasiList) {
             globalData = data || [];
             
             if (Array.isArray(santriList)) {
                 const normalizedSantri = santriList.map(item => {
                     const s = { ...(item || {}) };
-                    s.id = s.id || s.ID || s.Id || ('S_' + Math.random().toString(36).slice(2));
-                    s.nama = s.nama || s['Nama Santri'] || s.Nama || s.namaSantri || '';
-                    s.gender = (s.gender || s['L/P'] || 'L').toString().trim().toUpperCase().startsWith('P') ? 'P' : 'L';
-                    s.tempatLahir = s.tempatLahir || s['Tempat Lahir'] || '';
-                    s.tglLahir = s.tglLahir || s['Tanggal Lahir'] || '';
+                    s.id = getFlexibleField(s, 'id', 'ID', 'Id') || ('S_' + Math.random().toString(36).slice(2));
+                    s.nama = getFlexibleField(s, 'nama', 'Nama Santri', 'Nama', 'Nama Lengkap', 'namaSantri');
+                    const rawGender = getFlexibleField(s, 'gender', 'L/P', 'Jenis Kelamin', 'JK') || 'L';
+                    s.gender = rawGender.toString().trim().toUpperCase().startsWith('P') ? 'P' : 'L';
+                    s.tempatLahir = getFlexibleField(s, 'tempatLahir', 'Tempat Lahir', 'Tempat', 'Kota Lahir');
+                    s.tglLahir = getFlexibleField(s, 'tglLahir', 'Tanggal Lahir', 'tgl lahir', 'Tgl Lahir', 'Tgl. Lahir', 'Tgl');
+                    s.ttl = getFlexibleField(s, 'ttl', 'TTL', 'Tempat, Tanggal Lahir');
                     if (!s.ttl && (s.tempatLahir || s.tglLahir)) {
                         s.ttl = (s.tempatLahir ? s.tempatLahir : '') + (s.tglLahir ? (s.tempatLahir ? ', ' : '') + s.tglLahir : '');
                     }
-                    s.nis = (s.nis !== undefined && s.nis !== null) ? String(s.nis).trim() : String(s.NIS || '').trim();
-                    s.nisq = (s.nisq !== undefined && s.nisq !== null) ? String(s.nisq).trim() : String(s.NISQ || '').trim();
-                    s.jilidSekarang = s.jilidSekarang || s['Jilid Sekarang'] || s.kelasAwal || s.Jilid || 'Kls 1A';
-                    s.namaTpq = s.namaTpq || s['Nama TPQ'] || s.namaTpqLembaga || '';
-                    s.kecamatan = s.kecamatan || s.Kecamatan || '';
-                    s.status = s.status || s.Status || 'Aktif';
+                    s.nis = getFlexibleField(s, 'nis', 'NIS', 'No NIS', 'Nomor Induk');
+                    s.nisq = getFlexibleField(s, 'nisq', 'NISQ', 'No NISQ');
+                    s.jilidSekarang = getFlexibleField(s, 'jilidSekarang', 'Jilid Sekarang', 'Jilid', 'Kelas Awal', 'kelasAwal') || 'Kls 1A';
+                    s.namaTpq = getFlexibleField(s, 'namaTpq', 'Nama Lembaga', 'Nama TPQ', 'Lembaga TPQ', 'Lembaga', 'TPQ', 'namaTpqLembaga');
+                    s.kecamatan = getFlexibleField(s, 'kecamatan', 'Kecamatan', 'Kec.', 'Kec', 'Wilayah');
+                    s.status = getFlexibleField(s, 'status', 'Status', 'Status Keaktifan') || 'Aktif';
                     return s;
                 });
                 globalSantri = normalizedSantri;
@@ -3023,16 +3050,32 @@ async function handleLoginSubmit(event) {
             if (Array.isArray(guruList)) {
                 const normalizedGuru = guruList.map(item => {
                     const g = { ...(item || {}) };
-                    g.id = g.id || g.ID || g.Id || ('G_' + Math.random().toString(36).slice(2));
-                    g.nama = g.nama || g['Nama Guru'] || g.Nama || '';
-                    g.gender = (g.gender || g['L/P'] || 'L').toString().trim().toUpperCase().startsWith('P') ? 'P' : 'L';
-                    g.tempatLahir = g.tempatLahir || g['Tempat Lahir'] || '';
-                    g.tglLahir = g.tglLahir || g['Tanggal Lahir'] || '';
-                    g.idGuru = (g.idGuru !== undefined && g.idGuru !== null) ? String(g.idGuru).trim() : String(g['ID Guru Qiraati'] || g['ID Guru'] || '').trim();
-                    g.mulaiMengajar = g.mulaiMengajar || g['Mulai Mengajar'] || '';
-                    g.namaTpq = g.namaTpq || g['Nama TPQ'] || '';
-                    g.kecamatan = g.kecamatan || g.Kecamatan || '';
-                    g.status = g.status || g.Status || 'Aktif';
+                    g.id = getFlexibleField(g, 'id', 'ID', 'Id') || ('G_' + Math.random().toString(36).slice(2));
+                    g.nama = getFlexibleField(g, 'nama', 'Nama Guru', 'Nama', 'Nama Lengkap', 'Nama Lengkap Guru', 'Nama Ustadzah', 'namaGuru');
+                    const rawGender = getFlexibleField(g, 'gender', 'L/P', 'Jenis Kelamin', 'JK') || 'L';
+                    g.gender = rawGender.toString().trim().toUpperCase().startsWith('P') ? 'P' : 'L';
+                    g.tempatLahir = getFlexibleField(g, 'tempatLahir', 'Tempat Lahir', 'Tempat', 'Kota Lahir');
+                    g.tglLahir = getFlexibleField(g, 'tglLahir', 'Tanggal Lahir', 'tgl lahir', 'Tgl Lahir', 'Tgl. Lahir', 'Tgl', 'TglLahir');
+                    g.ttl = getFlexibleField(g, 'ttl', 'TTL', 'Tempat, Tanggal Lahir', 'Tempat Tanggal Lahir');
+                    if (!g.ttl && (g.tempatLahir || g.tglLahir)) {
+                        g.ttl = (g.tempatLahir ? g.tempatLahir : '') + (g.tglLahir ? (g.tempatLahir ? ', ' : '') + g.tglLahir : '');
+                    }
+                    g.idGuru = getFlexibleField(g, 'idGuru', 'Id Guru', 'ID Guru Qiraati', 'ID Guru', 'ID', 'No ID', 'NIG');
+                    g.mulaiMengajar = getFlexibleField(g, 'mulaiMengajar', 'Mulai Mengajar', 'TMT', 'Tahun Mengajar', 'Tahun Mulai Mengajar', 'Mulai Tugas', 'Tanggal Mulai');
+                    g.namaTpq = getFlexibleField(g, 'namaTpq', 'Nama Lembaga', 'Lembaga TPQ', 'Nama TPQ', 'Lembaga / TPQ', 'Lembaga', 'TPQ', 'namaTpqLembaga');
+                    g.kecamatan = getFlexibleField(g, 'kecamatan', 'Kecamatan', 'Kec.', 'Kec', 'Wilayah');
+                    
+                    // Auto-resolve kecamatan dari TPQ jika kosong
+                    if (!g.kecamatan && g.namaTpq) {
+                        for (const [kec, list] of Object.entries(tpqListByKecamatan || {})) {
+                            if (Array.isArray(list) && list.some(t => t.toLowerCase() === g.namaTpq.toLowerCase())) {
+                                g.kecamatan = kec;
+                                break;
+                            }
+                        }
+                    }
+
+                    g.status = getFlexibleField(g, 'status', 'Status', 'Status Keaktifan') || 'Aktif';
                     return g;
                 });
                 globalGuru = normalizedGuru;
@@ -4582,6 +4625,10 @@ async function handleLoginSubmit(event) {
                     </tr>
                 `;
             }
+
+            const grandTotalDasar = grandTotalDasarBocil + grandTotalDasarBocol;
+            const grandTotalPra = grandTotalPraBocil + grandTotalPraBocol;
+            const grandTotalPtpt = grandTotalPtptBocil + grandTotalPtptBocol;
 
             const elTotalSantri = document.getElementById('kecStatTotalSantri');
             const elTotalGuruKec = document.getElementById('kecStatTotalGuru');
