@@ -555,35 +555,49 @@ let lastSantriFilterKey = '';
             const byTpq = {};
             const bKey = bulanKey || getPeriodeBulanSekarangKey();
 
+            function getCanonicalTpqKey(rawName) {
+                if (!rawName) return '';
+                return String(rawName).trim().toUpperCase().replace(/\s+/g, ' ');
+            }
+
             // 1. Akumulasi santri aktif ke 24 kelas
             (Array.isArray(globalSantri) ? globalSantri : []).forEach(s => {
                 if ((s.status || 'Aktif').toLowerCase() === 'nonaktif') return;
 
-                const namaTpq = String(s.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                const namaTpq = String(s.namaTpq || '').trim();
+                if (!namaTpq) return; // Jangan buat entri jika nama TPQ kosong
+
+                const normKey = getCanonicalTpqKey(namaTpq);
                 const kec = String(s.kecamatan || '').trim();
-                if (!byTpq[namaTpq]) {
-                    const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: bKey, jumlahGuru: 0, total: 0 };
+                if (!byTpq[normKey]) {
+                    const row = { id: 'AUTO_' + normKey, namaTpq: namaTpq, kecamatan: kec, bulan: bKey, jumlahGuru: 0, total: 0 };
                     rekapFields.forEach(f => row[f] = 0);
-                    byTpq[namaTpq] = row;
+                    byTpq[normKey] = row;
                 }
-                const row = byTpq[namaTpq];
+                const row = byTpq[normKey];
+                if (!row.kecamatan && kec) row.kecamatan = kec;
                 row.total++;
                 const fld = (typeof deteksiKategoriKelasSantri === 'function') ? deteksiKategoriKelasSantri(s) : null;
                 if (fld && row[fld] !== undefined) row[fld]++;
             });
 
-            // 2. Akumulasi guru aktif per TPQ
+            // 2. Akumulasi guru aktif per TPQ (jika nama lembaga sama antara sheet santri dan guru, dihitung 1 lembaga yang sama)
             (Array.isArray(globalGuru) ? globalGuru : []).forEach(g => {
                 if ((g.status || 'Aktif').toLowerCase() === 'nonaktif') return;
 
-                const namaTpq = String(g.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                const namaTpq = String(g.namaTpq || '').trim();
+                if (!namaTpq) return; // Jangan buat entri dummy jika nama TPQ kosong
+
+                const normKey = getCanonicalTpqKey(namaTpq);
                 const kec = String(g.kecamatan || '').trim();
-                if (!byTpq[namaTpq]) {
-                    const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: bKey, jumlahGuru: 0, total: 0 };
+                if (!byTpq[normKey]) {
+                    const row = { id: 'AUTO_' + normKey, namaTpq: namaTpq, kecamatan: kec, bulan: bKey, jumlahGuru: 0, total: 0 };
                     rekapFields.forEach(f => row[f] = 0);
-                    byTpq[namaTpq] = row;
+                    byTpq[normKey] = row;
                 }
-                byTpq[namaTpq].jumlahGuru++;
+                const row = byTpq[normKey];
+                if (!row.kecamatan && kec) row.kecamatan = kec;
+                row.jumlahGuru++;
             });
 
             // 3. Hitung demografi Bocil vs Bocol
@@ -3135,28 +3149,41 @@ async function handleLoginSubmit(event) {
             if (!Array.isArray(globalData) || globalData.length === 0) {
                 const rekapFields = ['kelas1a','kelas1b','kelas1c','kelas2a','kelas2b','kelas3a','kelas3b','kelas4a','kelas4b','kelas5a','kelas5b','persiapanImtas','persiapanKhotaman','praPtpt1','praPtpt2','praPtpt3','praPtpt4','praPtpt5','ptpt1','ptpt2','ptpt3','ptpt4','ptpt5','ptpt6'];
                 const byTpq = {};
+                function getCanonicalTpqKey(rawName) {
+                    if (!rawName) return '';
+                    return String(rawName).trim().toUpperCase().replace(/\s+/g, ' ');
+                }
                 (Array.isArray(globalSantri) ? globalSantri : []).forEach(s => {
-                    const namaTpq = String(s.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                    if ((s.status || 'Aktif').toLowerCase() === 'nonaktif') return;
+                    const namaTpq = String(s.namaTpq || '').trim();
+                    if (!namaTpq) return;
+                    const normKey = getCanonicalTpqKey(namaTpq);
                     const kec = String(s.kecamatan || '').trim();
-                    if (!byTpq[namaTpq]) {
-                        const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: '', jumlahGuru: 0, total: 0 };
+                    if (!byTpq[normKey]) {
+                        const row = { id: 'AUTO_' + normKey, namaTpq: namaTpq, kecamatan: kec, bulan: '', jumlahGuru: 0, total: 0 };
                         rekapFields.forEach(f => row[f] = 0);
-                        byTpq[namaTpq] = row;
+                        byTpq[normKey] = row;
                     }
-                    const row = byTpq[namaTpq];
+                    const row = byTpq[normKey];
+                    if (!row.kecamatan && kec) row.kecamatan = kec;
                     row.total++;
                     const fld = (typeof deteksiKategoriKelasSantri === 'function') ? deteksiKategoriKelasSantri(s) : null;
                     if (fld && row[fld] !== undefined) row[fld]++;
                 });
                 (Array.isArray(globalGuru) ? globalGuru : []).forEach(g => {
-                    const namaTpq = String(g.namaTpq || '').trim() || 'Tanpa Nama TPQ';
+                    if ((g.status || 'Aktif').toLowerCase() === 'nonaktif') return;
+                    const namaTpq = String(g.namaTpq || '').trim();
+                    if (!namaTpq) return;
+                    const normKey = getCanonicalTpqKey(namaTpq);
                     const kec = String(g.kecamatan || '').trim();
-                    if (!byTpq[namaTpq]) {
-                        const row = { id: 'AUTO_' + namaTpq, namaTpq: namaTpq, kecamatan: kec, bulan: '', jumlahGuru: 0, total: 0 };
+                    if (!byTpq[normKey]) {
+                        const row = { id: 'AUTO_' + normKey, namaTpq: namaTpq, kecamatan: kec, bulan: '', jumlahGuru: 0, total: 0 };
                         rekapFields.forEach(f => row[f] = 0);
-                        byTpq[namaTpq] = row;
+                        byTpq[normKey] = row;
                     }
-                    byTpq[namaTpq].jumlahGuru++;
+                    const row = byTpq[normKey];
+                    if (!row.kecamatan && kec) row.kecamatan = kec;
+                    row.jumlahGuru++;
                 });
                 globalData = Object.values(byTpq);
             }
@@ -3395,7 +3422,9 @@ async function handleLoginSubmit(event) {
                 }
             }
 
-            const totalTpq = activeData.length;
+            // Hitung total TPQ unik (nama lembaga yang sama antara santri & guru dihitung 1 lembaga)
+            const uniqueTpqSet = new Set(activeData.map(d => (d.namaTpq || '').trim().toUpperCase()).filter(Boolean));
+            const totalTpq = uniqueTpqSet.size;
             let totalSantri = 0;
             let totalGuru = 0;
             let totalDasar = 0;
@@ -3403,6 +3432,7 @@ async function handleLoginSubmit(event) {
             let totalPtpt = 0;
 
             let kecCounts = { "Pakal": 0, "Jambangan": 0, "Kenjeran": 0, "Rungkut": 0, "Gunung Anyar": 0, "Karang Pilang": 0, "Asemrowo": 0, "Benowo": 0 };
+            const seenTpqPerKec = new Set();
 
             let sumKelas1a = 0, sumKelas1b = 0, sumKelas1c = 0;
             let sumKelas2a = 0, sumKelas2b = 0;
@@ -3434,7 +3464,9 @@ async function handleLoginSubmit(event) {
                 sumPra1 += (item.praPtpt1||0); sumPra2 += (item.praPtpt2||0); sumPra3 += (item.praPtpt3||0); sumPra4 += (item.praPtpt4||0); sumPra5 += (item.praPtpt5||0);
                 sumPtpt1 += (item.ptpt1||0); sumPtpt2 += (item.ptpt2||0); sumPtpt3 += (item.ptpt3||0); sumPtpt4 += (item.ptpt4||0); sumPtpt5 += (item.ptpt5||0); sumPtpt6 += (item.ptpt6||0);
 
-                if(kecCounts[item.kecamatan] !== undefined) {
+                const tpqKey = (item.namaTpq || '').trim().toUpperCase();
+                if(kecCounts[item.kecamatan] !== undefined && !seenTpqPerKec.has(tpqKey)) {
+                    seenTpqPerKec.add(tpqKey);
                     kecCounts[item.kecamatan]++;
                 }
             });
