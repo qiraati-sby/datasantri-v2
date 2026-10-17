@@ -177,21 +177,21 @@
                 return {
                     jenjang: 'dasar',
                     status: isBocol ? 'bocol' : 'bocil',
-                    label: isBocol ? 'TPQ Pagi Bocol (> 5 th)' : 'TPQ Pagi Bocil (3â€“5 th)'
+                    label: isBocol ? 'TPQ Pagi Bocol (> 5 th)' : 'TPQ Pagi Bocil (3–5 th)'
                 };
             } else if (jenjang === 'pra') {
                 const isBocol = umurObj.isLebihDariTepatTahun(9);
                 return {
                     jenjang: 'pra',
                     status: isBocol ? 'bocol' : 'bocil',
-                    label: isBocol ? 'PRA PTPT Bocol (> 9 th)' : 'PRA PTPT Bocil (3â€“9 th)'
+                    label: isBocol ? 'PRA PTPT Bocol (> 9 th)' : 'PRA PTPT Bocil (3–9 th)'
                 };
             } else { // ptpt
                 const isBocol = umurObj.isLebihDariTepatTahun(9);
                 return {
                     jenjang: 'ptpt',
                     status: isBocol ? 'bocol' : 'bocil',
-                    label: isBocol ? 'PTPT Bocol (> 9 th)' : 'PTPT Bocil (3â€“9 th)'
+                    label: isBocol ? 'PTPT Bocol (> 9 th)' : 'PTPT Bocil (3–9 th)'
                 };
             }
         }
@@ -602,11 +602,11 @@ let lastSantriFilterKey = '';
 
             // 3. Hitung demografi Bocil vs Bocol
             let countUsia = {
-                'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 â€“ 5 Tahun', color: '#f59e0b' },
+                'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
                 'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
-                'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 â€“ 9 Tahun', color: '#0ea5e9' },
+                'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
                 'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
-                'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 â€“ 9 Tahun', color: '#a855f7' },
+                'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
                 'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
             };
 
@@ -1536,7 +1536,7 @@ async function handleLoginSubmit(event) {
 
             if (GOOGLE_SCRIPT_WEB_APP_URL) {
                 try {
-                    const url = `${GOOGLE_SCRIPT_WEB_APP_URL}?action=login&username=${encodeURIComponent(cleanUser)}&passwordHash=${encodeURIComponent(passwordHash)}`;
+                    const url = `${GOOGLE_SCRIPT_WEB_APP_URL}?action=login&username=${encodeURIComponent(cleanUser)}&password=${encodeURIComponent(password)}&passwordHash=${encodeURIComponent(passwordHash)}`;
                     const response = await fetch(url);
                     const res = await response.json();
 
@@ -1566,6 +1566,18 @@ async function handleLoginSubmit(event) {
                     }
                 } catch(e) {
                     console.error("Gagal verifikasi login online:", e);
+                    // Fallback lokal darurat untuk admin jika koneksi ke server GAS gagal
+                    if (cleanUser === 'admin' && (password === 'qiraati2026' || passwordHash === '9cf8d2b7810360a0a527021465aa90eb3e0b23028212132712953258c73cbb76')) {
+                        const loggedUser = { username: 'admin', nama: 'Pengurus Cabang Surabaya', kecamatan: 'Semua', role: 'Admin' };
+                        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(loggedUser));
+                        uInput.value = '';
+                        pInput.value = '';
+                        btnSubmit.disabled = false;
+                        iconSubmit.className = "fa-solid fa-right-to-bracket";
+                        checkAuthSession();
+                        switchView('dashboard');
+                        return;
+                    }
                 }
             }
 
@@ -3383,11 +3395,11 @@ async function handleLoginSubmit(event) {
                     // Data periode lampau memang kosong, kosongkan seluruh rekap dan metrik usia
                     activeData = [];
                     activeCountUsia = {
-                        'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 â€“ 5 Tahun', color: '#f59e0b' },
+                        'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
                         'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
-                        'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 â€“ 9 Tahun', color: '#0ea5e9' },
+                        'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
                         'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
-                        'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 â€“ 9 Tahun', color: '#a855f7' },
+                        'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
                         'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
                     };
                 }
@@ -3672,11 +3684,11 @@ async function handleLoginSubmit(event) {
                 countUsia = activeCountUsia;
             } else {
                 countUsia = {
-                    'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 â€“ 5 Tahun', color: '#f59e0b' },
+                    'dasar_bocil': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocil',  rentang: '3 – 5 Tahun', color: '#f59e0b' },
                     'dasar_bocol': { l: 0, p: 0, total: 0, label: 'TPQ Pagi - Bocol',  rentang: '> 5 Tahun', color: '#ea580c' },
-                    'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 â€“ 9 Tahun', color: '#0ea5e9' },
+                    'pra_bocil':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocil',  rentang: '3 – 9 Tahun', color: '#0ea5e9' },
                     'pra_bocol':   { l: 0, p: 0, total: 0, label: 'PRA PTPT - Bocol',  rentang: '> 9 Tahun', color: '#2563eb' },
-                    'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 â€“ 9 Tahun', color: '#a855f7' },
+                    'ptpt_bocil':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocil',      rentang: '3 – 9 Tahun', color: '#a855f7' },
                     'ptpt_bocol':  { l: 0, p: 0, total: 0, label: 'PTPT - Bocol',      rentang: '> 9 Tahun', color: '#7c3aed' }
                 };
 
@@ -4027,7 +4039,7 @@ async function handleLoginSubmit(event) {
             snapList.sort((a, b) => b.id.localeCompare(a.id));
             saveSnapshotList(snapList);
 
-            if (manual) alert(`âœ… Cutoff rekap ${BULAN_INDO[snapMo]} ${snapYr} berhasil disimpan!\nTotal: ${totalSantri} santri, ${totalGuru} guru, ${totalLembaga} lembaga.`);
+            if (manual) alert(`✅ Cutoff rekap ${BULAN_INDO[snapMo]} ${snapYr} berhasil disimpan!\nTotal: ${totalSantri} santri, ${totalGuru} guru, ${totalLembaga} lembaga.`);
 
             renderRekapBulanan();
         }
@@ -4246,9 +4258,9 @@ async function handleLoginSubmit(event) {
             const isLembagaSnap = snap.role === 'lembaga';
             const isKorcamSnap = snap.role === 'korcam';
 
-            let subJudulKop = `REKAP BULANAN â€” ${bulanLabel.toUpperCase()}`;
-            if (isLembagaSnap) subJudulKop = `REKAP BULANAN LEMBAGA ${snap.scopeLabel ? snap.scopeLabel.toUpperCase() : ''} â€” ${bulanLabel.toUpperCase()}`;
-            else if (isKorcamSnap) subJudulKop = `REKAP BULANAN ${snap.scopeLabel ? snap.scopeLabel.toUpperCase() : ''} â€” ${bulanLabel.toUpperCase()}`;
+            let subJudulKop = `REKAP BULANAN — ${bulanLabel.toUpperCase()}`;
+            if (isLembagaSnap) subJudulKop = `REKAP BULANAN LEMBAGA ${snap.scopeLabel ? snap.scopeLabel.toUpperCase() : ''} — ${bulanLabel.toUpperCase()}`;
+            else if (isKorcamSnap) subJudulKop = `REKAP BULANAN ${snap.scopeLabel ? snap.scopeLabel.toUpperCase() : ''} — ${bulanLabel.toUpperCase()}`;
 
             const kecRows = (snap.statsKec||[]).map((k,i) => `
                 <tr>
