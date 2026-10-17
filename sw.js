@@ -1,10 +1,13 @@
-const CACHE_NAME = 'datasantri-qiraati-v2';
+const CACHE_NAME = 'datasantri-qiraati-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './css/style.css',
+  './js/app.js',
+  './img/logo-qiraati.jpg'
 ];
 
 self.addEventListener('install', (event) => {
